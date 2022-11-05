@@ -11,12 +11,6 @@ def draw_contour_bounding_box(image, contours, color=(0, 0, 255), thickness=2):
         cv2.rectangle(image, (x, y), (x + w, y + h), color, thickness)
 
 
-def get_images_difference(image1, image2):
-    (score, diff) = compare_ssim(image1, image2, full=True)
-    diff = (diff * 255).astype("uint8")
-    return score, diff
-
-
 def get_contours(image):
     cnts = cv2.findContours(image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
@@ -76,7 +70,7 @@ def get_hsv_canny(image, lower, upper):
 
 
 def get_center_points(canny, lower_area=4500, upper_area=5650, draw_points=False, draw_contours=False, image=None):
-    processed_img = cv2.GaussianBlur(canny, (3, 3), 0)
+    processed_img = cv2.GaussianBlur(canny, (5, 5), 0)
     _, processed_img = cv2.threshold(processed_img, 50, 255, cv2.THRESH_BINARY)
     # find contours
     contours, hierarchy = cv2.findContours(processed_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -84,6 +78,7 @@ def get_center_points(canny, lower_area=4500, upper_area=5650, draw_points=False
     corner_points = []
     for c in contours:
         area = cv2.contourArea(c)
+
         if lower_area < area < upper_area:
             (x, y, w, h) = cv2.boundingRect(c)
             corner_1 = (x, y)
@@ -104,7 +99,7 @@ def get_center_points(canny, lower_area=4500, upper_area=5650, draw_points=False
                 cv2.circle(image, corner_4, 3, (34, 127, 127))
             if draw_contours:
                 cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 255), 2)
-    return center_points, corner_points
+    return center_points, corner_points, processed_img
 
 
 def get_distance_between_points(point1, point2):
@@ -134,11 +129,13 @@ def reduce_points(points):
 
 
 def corner_points_to_2d_matrix(points, size=9):
-    return [points[i:i + size] for i in range(0, len(points), size)]
-
+    matrix =  [points[i:i + size] for i in range(0, len(points), size)]
+    for i, _ in enumerate(matrix):
+        matrix[i] = sort_array_of_points(matrix[i])
+    return matrix
 
 def corner_points_to_squares(points, size=8, with_text=False, image=None):
-    counter = 1
+    counter = 0
     font = cv2.FONT_HERSHEY_SIMPLEX
     fontScale = 0.5
     fontColor = (0, 255, 0)
@@ -160,3 +157,76 @@ def corner_points_to_squares(points, size=8, with_text=False, image=None):
                             lineType)
                 counter += 1
     return squares
+
+
+def get_images_diff(grayA, grayB, lower_area=1500, upper_area=5650, with_box=False, image=None):
+    (score, diff) = compare_ssim(grayA, grayB, full=True)
+    diff = (diff * 255).astype("uint8")
+    thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+    final_cnts = []
+    for c in cnts:
+        area = cv2.contourArea(c)
+        if lower_area < area < upper_area:
+            final_cnts.append(c)
+            if with_box:
+                (x, y, w, h) = cv2.boundingRect(c)
+                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    return score, diff, thresh, cnts
+
+
+def get_each_square_diff(imageA, imageB, squaresA, squaresB, threshold=0.6, show_box=False, image=None):
+
+    grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
+    grayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY)
+    squares_with_differences = []
+    for i in range(len(squaresA)):
+        sA = squaresA[i]
+        sB = squaresB[i]
+        x1, y1 = sA[0]
+        x2, y2 = sA[2]
+        square1 = grayA[y1:y2, x1:x2]
+        x1, y1 = sB[0]
+        x2, y2 = sB[2]
+        square2 = grayB[y1:y2, x1:x2]
+
+
+        print(f"Comparing {square1.shape} to {square2.shape}")
+        if square1.shape != square2.shape:
+            up_width = square2.shape[1]
+            up_height = square2.shape[0]
+            up_points = (up_width, up_height)
+            square1 = cv2.resize(square1, up_points, interpolation=cv2.INTER_LINEAR)
+        print(f"Comparing {square1.shape} to {square2.shape}")
+
+        score, diff, thresh, cnts = get_images_diff(square1, square2, with_box=False, image=None)
+        print(f"Score is {score}")
+        if score < threshold:
+            cv2.imshow(str(score),square1)
+            cv2.imshow(str(score+1),square2)
+            squares_with_differences.append(sA)
+            if show_box:
+                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    return squares_with_differences
+
+
+def get_move_made(squares_with_differences, matrix_2d):
+    move_index = []
+    for d in squares_with_differences:
+        def index_2d(data, search):
+            for i, e in enumerate(data):
+                try:
+                    return i, e.index(search)
+                except ValueError:
+                    pass
+
+        i, j = index_2d(matrix_2d, d[0])
+        move_index.append((i, j))
+    return move_index
+
+
+def sort_array_of_points(points):
+    points = sorted(points, key=lambda x: x[0])
+    points = sorted(points, key=lambda x: x[1])
+    return points
