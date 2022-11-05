@@ -33,3 +33,5 @@ if __name__ == "__main__":
     engine = ChessEngine(stockfish_path)
     print(engine.get_board())
     print(engine.get_next_best_move())
+    engine.make_move("d2d4")
+    print(engine.get_board())

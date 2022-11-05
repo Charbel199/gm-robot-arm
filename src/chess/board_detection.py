@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 # Load the image
-image1 = cv2.imread('../assets/chessboard_bw3.jpg')
+image1 = cv2.imread('../assets/chessboard_bw.jpg')
 lwr = np.array([0, 0, 131])
 upr = np.array([179, 40, 255])
 
