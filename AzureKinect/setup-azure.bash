@@ -1,3 +1,4 @@
+#!/bin/bash
 apt update
 apt-get install software-properties-common -y
 apt install curl -y
