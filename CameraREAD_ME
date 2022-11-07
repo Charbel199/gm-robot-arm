@@ -1,7 +1,0 @@
-1) Navigate to the AzureKinect directory
-2)  . DockerBuild.bash
-3) Wait for the docker iamge to build 
-4) navigate back to the root of the repo
-5)  . CameraRun.bash
-6) subscribe to the topic /rgb/image_raw for a BGRA format image 
-
