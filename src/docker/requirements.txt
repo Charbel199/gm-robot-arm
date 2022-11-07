@@ -1,0 +1,8 @@
+stockfish~=3.28.0
+opencv-python~=4.6.0.66
+numpy~=1.23.3
+imutils~=0.5.4
+scikit-image~=0.19.2
+matplotlib~=3.5.1
+setuptools~=45.2.0
+dataclasses~=0.6
