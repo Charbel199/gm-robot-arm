@@ -28,8 +28,8 @@ class MoveDetector():
 
 if __name__ == "__main__":
     # load the two input images
-    imageA = cv2.imread('../assets/moves/move2-1.png')
-    imageB = cv2.imread('../assets/moves/move2-2.png')
+    imageA = cv2.imread('src/assets/moves/move2-1.png')
+    imageB = cv2.imread('src/assets/moves/move2-2.png')
 
     if imageA.shape != imageB.shape:
         print(imageA.shape)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     print(matrix_2dB)
     squaresB = corner_points_to_squares(matrix_2dB, with_text=True, image=imageB_copy)
 
-    squares_with_differences = get_each_square_diff(imageA, imageB, squaresA, squaresB, threshold=0.4, show_box=True,
+    squares_with_differences = get_each_square_diff(imageA, imageB, squaresA, squaresB, threshold=0.1, show_box=True,
                                                     image=imageA_copy)
 
     move_index = get_move_made(squares_with_differences, matrix_2dA)
