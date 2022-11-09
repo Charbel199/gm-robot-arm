@@ -15,18 +15,19 @@ class ChessEngine():
             self.stockfish.make_moves_from_current_position([move])
         else:
             print(f"Move {move} is not valid.")
-    
-    def get_board(self,white_side = True):
+
+    def get_board(self, white_side=True):
         return self.stockfish.get_board_visual(white_side)
 
     def get_next_best_move(self):
         return self.stockfish.get_best_move()
 
-    def get_piece(self,position):
+    def get_piece(self, position):
         return self.stockfish.get_what_is_on_square(position)
 
-    def get_type_of_move(self,move):
+    def get_type_of_move(self, move):
         return self.stockfish.will_move_be_a_capture(move)
+
 
 if __name__ == "__main__":
     stockfish_path = "/home/charbel199/projs/gm-robot-arm/src/assets/engine/stockfish"
