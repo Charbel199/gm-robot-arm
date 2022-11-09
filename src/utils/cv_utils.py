@@ -179,7 +179,7 @@ def corner_points_to_squares(points, size=8, with_text=False, image=None):
 
 
 # Get difference between grayscale images
-def get_images_diff2(imgA, imgB):
+def get_images_diff_histograms(imgA, imgB):
     hist1A = cv2.calcHist([imgA], [0], None, [256], [0, 256])
     hist2A = cv2.calcHist([imgA], [1], None, [256], [0, 256])
     hist3A = cv2.calcHist([imgA], [2], None, [256], [0, 256])
@@ -194,7 +194,7 @@ def get_images_diff2(imgA, imgB):
     return score
 
 
-def get_images_diff(grayA, grayB, lower_area=1500, upper_area=5650, with_box=False, image=None):
+def get_images_diff_legacy(grayA, grayB, lower_area=1500, upper_area=5650, with_box=False, image=None):
     (score, diff) = compare_ssim(grayA, grayB, full=True)
     diff = (diff * 255).astype("uint8")
     thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
@@ -212,41 +212,37 @@ def get_images_diff(grayA, grayB, lower_area=1500, upper_area=5650, with_box=Fal
 
 
 # Get difference between each chessboard square
-def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_differences=True, show_box=False, image=None):
-    grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
-    grayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY)
+def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False, image=None):
     squares_with_differences = []
+
     squares_to_show = []
     squares_to_show_titles = []
+
     for i in range(len(squares)):
         s = squares[i]
         x1, y1 = s[0]
         x2, y2 = s[2]
 
-        # score, diff, thresh, cnts = get_images_diff(square1, square2, with_box=False, image=None)
-
         square1 = imageA[y1:y2, x1:x2]
         square2 = imageB[y1:y2, x1:x2]
 
-        score = get_images_diff2(square1, square2)
-
-        print(f"Score is {score} at {i}")
+        score = get_images_diff_histograms(square1, square2)
 
         if score < threshold:
             squares_with_differences.append(s)
+
             squares_to_show.append(square1)
             squares_to_show.append(square2)
-            print("adding 2 squars to show ", len(squares_to_show))
             squares_to_show_titles.append(f"{i} {str(score)} A")
             squares_to_show_titles.append(f"{i} {str(score)} B")
-            print(squares_to_show_titles)
+
             if show_box:
                 cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-    if show_differences:
-        squares_differences = concat_images(squares_to_show, squares_to_show_titles, force_row_size=2, fontScale=2)
-        # cv2.imshow("squares_differences", squares_differences)
 
-    return squares_with_differences, squares_differences
+    squares_differences_images = concat_images(squares_to_show, squares_to_show_titles, force_row_size=2, fontScale=2)
+
+
+    return squares_with_differences, squares_differences_images
 
 
 # Deduce move made based on square differences

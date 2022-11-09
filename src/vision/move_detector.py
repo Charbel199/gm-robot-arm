@@ -27,20 +27,16 @@ class MoveDetector():
 
 if __name__ == "__main__":
     # load the two input images
-    empty_image = cv2.imread('src/assets/moves/lichess_empty.png')
-    imageA = cv2.imread('src/assets/moves/lichess_1.png')
-    imageB = cv2.imread('src/assets/moves/lichess_2.png')
+    empty_image = cv2.imread('src/assets/moves/empty_lichess2.png')
+    imageA = cv2.imread('src/assets/moves/lichess2_1.png')
+    imageB = cv2.imread('src/assets/moves/lichess2_2.png')
 
     if imageA.shape != imageB.shape:
-        print(imageA.shape)
-        print(imageB.shape)
+        print(f"Reshaping imageA from {imageA.shape} to {imageB.shape}")
         up_width = imageA.shape[1]
         up_height = imageA.shape[0]
         up_points = (up_width, up_height)
         imageB = cv2.resize(imageB, up_points, interpolation=cv2.INTER_LINEAR)
-
-    print(imageA.shape)
-    print(imageB.shape)
 
     # Lichess White and Blue board
     hsv_min_b = np.array([0, 69, 0])
@@ -55,24 +51,25 @@ if __name__ == "__main__":
     # hsv_max_w = np.array([93, 255, 124])
 
     image_write = imageA.copy()
-    squares, matrix_2d, calibraion_b, calibraion_w, calibraion_bw, calibraion_processed = get_image_information(
+    squares, matrix_2d, calibration_b, calibration_w, calibration_bw, calibraion_processed = get_image_information(
         empty_image, image_write, hsv_min_b, hsv_max_b,
         hsv_min_w, hsv_max_w)
 
-    print(squares)
     # Difference between snapshots
-
-    squares_with_differences, squares_differences = get_each_square_diff(imageA, imageB, squares, threshold=0.8,
-                                                                         show_box=True,
-                                                                         image=image_write)
+    squares_with_differences, squares_differences_images = get_each_square_diff(imageA, imageB, squares, threshold=0.8,
+                                                                                show_box=True,
+                                                                                image=image_write)
 
     move_index = get_move_made(squares_with_differences, matrix_2d)
     for move in move_index:
         print(f"Move {chessboard_map[move[0]][move[1]]}")
 
-    images_to_show = [image_write, calibraion_b, calibraion_w, calibraion_bw, calibraion_processed, squares_differences]
-    images_titles = ['image_copy', 'calibraion_b', 'calibraion_w', 'calibraion_bw', 'calibraion_processed',
-                     'squares_differences']
+
+    # Show images
+    images_to_show = [image_write, calibration_b, calibration_w, calibration_bw, calibraion_processed,
+                      squares_differences_images]
+    images_titles = ['image_copy', 'calibration_b', 'calibration_w', 'calibration_bw', 'calibraion_processed',
+                     'squares_differences_images']
     final_image = concat_images(images_to_show, images_titles)
     cv2.imshow("final_image", final_image)
 
