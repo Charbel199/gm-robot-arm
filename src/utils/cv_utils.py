@@ -273,7 +273,7 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
     # Estimate minium area of square
     image_area = image.shape[0] * image.shape[1]
     square_area = image_area * board_percentage / 64
-    logger.info(f"Square area {square_area}")
+    logger.debug(f"Square area {square_area}")
 
     # Get center points, corner points and processed image
     center_points, corner_points, processed_image = get_center_points(res_bw, lower_area=square_area,
@@ -282,7 +282,7 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
     # Reduce points
     corner_points = reduce_points(corner_points)
     center_points = reduce_points(center_points)
-    logger.info(f"Number of center points: {len(center_points)}, Number of corner points {len(corner_points)}")
+    logger.debug(f"Number of center points: {len(center_points)}, Number of corner points {len(corner_points)}")
     # assert len(center_points) == 64
     # assert len(corner_points) == 81
     squares = None

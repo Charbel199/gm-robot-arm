@@ -66,7 +66,7 @@ class VisionCore:
         logger.info("Detecting user move")
         if self.current_image.shape != self.previous_image.shape:
             # TODO: Warp and crop
-            print(f"Reshaping self.current_image from {self.current_image.shape} to {self.previous_image.shape}")
+            logger.debug(f"Reshaping self.current_image from {self.current_image.shape} to {self.previous_image.shape}")
             up_width = self.current_image.shape[1]
             up_height = self.current_image.shape[0]
             up_points = (up_width, up_height)
