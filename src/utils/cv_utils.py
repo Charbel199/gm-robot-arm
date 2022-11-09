@@ -3,6 +3,7 @@ import cv2
 import imutils
 import numpy as np
 import math
+from sewar.full_ref import mse, rmse, psnr, uqi, ssim, ergas, scc, rase, sam, msssim, vifp
 
 
 # Draw bounding boxes around contours
@@ -20,17 +21,25 @@ def get_contours(image):
 
 
 # Concat images and titles in a single window
-def concat_images(images, titles, with_titles=True):
+def concat_images(images, titles, force_row_size=None, with_titles=True, width=None, height=None, fontScale=1):
+    if width is None:
+        width = images[0].shape[1]
+    if height is None:
+        height = images[0].shape[0]
+
     font = cv2.FONT_HERSHEY_SIMPLEX
     position = (15, 35)
-    fontScale = 1
     fontColor = (0, 255, 0)
     thickness = 2
     lineType = 1
     for i, image in enumerate(images):
         # Make all images 3 channels
         images[i] = np.stack((image,) * 3, axis=-1) if len(image.shape) < 3 else image
+        if images[i].shape != (width, height, 3):
+            up_points = (width, height)
+            images[i] = cv2.resize(images[i], up_points, interpolation=cv2.INTER_AREA)
         image = images[i]
+
         if with_titles:
             cv2.putText(image, titles[i],
                         position,
@@ -41,10 +50,10 @@ def concat_images(images, titles, with_titles=True):
                         lineType)
 
     num_images = len(images)
-    s = int(math.sqrt(num_images))
+    s = int(math.sqrt(num_images)) if force_row_size is None else force_row_size
 
     # Append empty images
-    empty_images = num_images % s
+    empty_images = s * math.ceil(num_images / s) - num_images
     [images.append(np.zeros_like(images[0])) for _ in range(empty_images)]
 
     def join_images(ims, horizontal=1):
@@ -76,7 +85,7 @@ def get_hsv_canny(image, lower, upper):
 # Get center points of chessboard squares based on canny image
 def get_center_points(canny, lower_area=4500, upper_area=5650, draw_points=False, draw_contours=False, image=None):
     processed_img = cv2.GaussianBlur(canny, (5, 5), 0)
-    _, processed_img = cv2.threshold(processed_img, 50, 255, cv2.THRESH_BINARY)
+    _, processed_img = cv2.threshold(processed_img, 30, 255, cv2.THRESH_BINARY)
     # find contours
     contours, hierarchy = cv2.findContours(processed_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     center_points = []
@@ -170,6 +179,21 @@ def corner_points_to_squares(points, size=8, with_text=False, image=None):
 
 
 # Get difference between grayscale images
+def get_images_diff2(imgA, imgB):
+    hist1A = cv2.calcHist([imgA], [0], None, [256], [0, 256])
+    hist2A = cv2.calcHist([imgA], [1], None, [256], [0, 256])
+    hist3A = cv2.calcHist([imgA], [2], None, [256], [0, 256])
+
+    hist1B = cv2.calcHist([imgB], [0], None, [256], [0, 256])
+    hist2B = cv2.calcHist([imgB], [1], None, [256], [0, 256])
+    hist3B = cv2.calcHist([imgB], [2], None, [256], [0, 256])
+    score1 = cv2.compareHist(hist1A, hist1B, cv2.HISTCMP_CORREL)
+    score2 = cv2.compareHist(hist2A, hist2B, cv2.HISTCMP_CORREL)
+    score3 = cv2.compareHist(hist3A, hist3B, cv2.HISTCMP_CORREL)
+    score = (score1 + score2 + score3) / 3
+    return score
+
+
 def get_images_diff(grayA, grayB, lower_area=1500, upper_area=5650, with_box=False, image=None):
     (score, diff) = compare_ssim(grayA, grayB, full=True)
     diff = (diff * 255).astype("uint8")
@@ -188,37 +212,41 @@ def get_images_diff(grayA, grayB, lower_area=1500, upper_area=5650, with_box=Fal
 
 
 # Get difference between each chessboard square
-def get_each_square_diff(imageA, imageB, squaresA, squaresB, threshold=0.6, show_box=False, image=None):
+def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_differences=True, show_box=False, image=None):
     grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
     grayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY)
     squares_with_differences = []
-    for i in range(len(squaresA)):
-        sA = squaresA[i]
-        sB = squaresB[i]
-        x1, y1 = sA[0]
-        x2, y2 = sA[2]
-        square1 = grayA[y1:y2, x1:x2]
-        x1, y1 = sB[0]
-        x2, y2 = sB[2]
-        square2 = grayB[y1:y2, x1:x2]
+    squares_to_show = []
+    squares_to_show_titles = []
+    for i in range(len(squares)):
+        s = squares[i]
+        x1, y1 = s[0]
+        x2, y2 = s[2]
 
-        print(f"Comparing {square1.shape} to {square2.shape}")
-        if square1.shape != square2.shape:
-            up_width = square2.shape[1]
-            up_height = square2.shape[0]
-            up_points = (up_width, up_height)
-            square1 = cv2.resize(square1, up_points, interpolation=cv2.INTER_LINEAR)
-        print(f"Comparing {square1.shape} to {square2.shape}")
+        # score, diff, thresh, cnts = get_images_diff(square1, square2, with_box=False, image=None)
 
-        score, diff, thresh, cnts = get_images_diff(square1, square2, with_box=False, image=None)
-        print(f"Score is {score}")
+        square1 = imageA[y1:y2, x1:x2]
+        square2 = imageB[y1:y2, x1:x2]
+
+        score = get_images_diff2(square1, square2)
+
+        print(f"Score is {score} at {i}")
+
         if score < threshold:
-            cv2.imshow(str(score), square1)
-            cv2.imshow(str(score + 1), square2)
-            squares_with_differences.append(sA)
+            squares_with_differences.append(s)
+            squares_to_show.append(square1)
+            squares_to_show.append(square2)
+            print("adding 2 squars to show ", len(squares_to_show))
+            squares_to_show_titles.append(f"{i} {str(score)} A")
+            squares_to_show_titles.append(f"{i} {str(score)} B")
+            print(squares_to_show_titles)
             if show_box:
                 cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-    return squares_with_differences
+    if show_differences:
+        squares_differences = concat_images(squares_to_show, squares_to_show_titles, force_row_size=2, fontScale=2)
+        # cv2.imshow("squares_differences", squares_differences)
+
+    return squares_with_differences, squares_differences
 
 
 # Deduce move made based on square differences
