@@ -2,7 +2,7 @@ from src.chess.chess_engine import ChessEngine
 import os
 
 
-class ChessCore():
+class ChessCore:
     def __init__(self, engine_side):
         self.engine_side = engine_side
         self.user_side = "WHITE" if engine_side == "BLACK" else "BLACK"
@@ -14,6 +14,9 @@ class ChessCore():
 
     def get_board(self):
         return self.engine.get_board(white_side=self.engine_is_white)
+
+    def get_board_image(self):
+        return self.engine.visualizer.get_board_image()
 
     def update_board(self, move) -> None:
         self.engine.make_move(move)
