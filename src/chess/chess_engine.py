@@ -1,8 +1,10 @@
 from stockfish import Stockfish
+from src.chess.chess_visualizer import ChessVisualizer
 
 
 class ChessEngine():
     def __init__(self, stockfish_path, elo_rating=1300) -> None:
+        self.visualizer = ChessVisualizer()
         self.stockfish = Stockfish(path=stockfish_path)
         self.stockfish.set_elo_rating(elo_rating)
 
@@ -13,11 +15,15 @@ class ChessEngine():
     def make_move(self, move):
         if (self.stockfish.is_move_correct(move)):
             self.stockfish.make_moves_from_current_position([move])
+            self.visualizer.make_move(move)
         else:
             print(f"Move {move} is not valid.")
 
     def get_board(self, white_side=True):
         return self.stockfish.get_board_visual(white_side)
+
+    def get_board_image(self):
+        return self.visualizer.get_board_image()
 
     def get_next_best_move(self):
         return self.stockfish.get_best_move()
