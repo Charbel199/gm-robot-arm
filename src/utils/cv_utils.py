@@ -4,6 +4,9 @@ import imutils
 import numpy as np
 import math
 from sewar.full_ref import mse, rmse, psnr, uqi, ssim, ergas, scc, rase, sam, msssim, vifp
+from src.logger.log import LoggerService
+
+logger = LoggerService.get_instance()
 
 
 # Draw bounding boxes around contours
@@ -241,7 +244,6 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
 
     squares_differences_images = concat_images(squares_to_show, squares_to_show_titles, force_row_size=2, fontScale=2)
 
-
     return squares_with_differences, squares_differences_images
 
 
@@ -271,7 +273,7 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
     # Estimate minium area of square
     image_area = image.shape[0] * image.shape[1]
     square_area = image_area * board_percentage / 64
-    print(f"Square area {square_area}")
+    logger.info(f"Square area {square_area}")
 
     # Get center points, corner points and processed image
     center_points, corner_points, processed_image = get_center_points(res_bw, lower_area=square_area,
@@ -280,7 +282,7 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
     # Reduce points
     corner_points = reduce_points(corner_points)
     center_points = reduce_points(center_points)
-    print(f"Number of center points: {len(center_points)}, Number of corner points {len(corner_points)}")
+    logger.info(f"Number of center points: {len(center_points)}, Number of corner points {len(corner_points)}")
     # assert len(center_points) == 64
     # assert len(corner_points) == 81
     squares = None

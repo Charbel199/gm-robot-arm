@@ -6,13 +6,16 @@ from pynput.keyboard import Key
 from pynput import keyboard
 import numpy as np
 import cv2
+from src.logger.log import LoggerService
+
+logger = LoggerService.get_instance()
 
 
 class GMCore:
     def __init__(self):
-
+        logger.info(f'Launching GM Core')
         # Print instructions
-        print(self.get_instructions())
+        logger.info(self.get_instructions())
 
         # Lichess White and Blue board
         hsv_min_b = np.array([0, 69, 0])
@@ -34,6 +37,7 @@ class GMCore:
         listener = keyboard.Listener(
             on_press=self.on_key_press)
         listener.start()
+        logger.info(f'Keyboard listeners started ...')
 
     def get_instructions(self):
         instructions = "INSTRUCTIONS \n" \
@@ -42,12 +46,14 @@ class GMCore:
                        "i: Capture on initial board layout\n" \
                        "m: Perform random move\n" \
                        "space: User move\n" \
-                       "q: Exit\n"
+                       "q: Exit\n" \
+                       "================\n"
         return instructions
 
     def on_key_press(self, key):
 
         if 'char' in dir(key):
+            logger.info(f'Key {key.char} was pressed')
             if key.char == 'e':
                 self.on_empty_board()
             if key.char == 'i':
@@ -55,19 +61,19 @@ class GMCore:
             if key.char == 'm':
                 self.random_move()
         if key == Key.space:
+            logger.info(f"Key 'space' was pressed")
             self.on_user_move()
 
     def on_empty_board(self):
-        print("Calibrating on empty board")
         self.vision_core.calibrate()
 
     def on_initial_board(self):
-        print("Capturing initial board layout")
         self.vision_core.capture_initial_chessboard_layout()
 
     def random_move(self):
-        print("Performing automatic move")
+        logger.info("Performing automatic move")
         self.chess_core.update_board(self.chess_core.get_next_best_move())
+        logger.info("Done performing automatic move")
 
     def on_user_move(self):
         self.vision_core.update_images()
@@ -84,9 +90,11 @@ class GMCore:
         self.chess_core.update_board(arm_move)
 
     def spin(self):
+        logger.info(f'Spinning ...')
         while True:
             cv2.imshow('Board ', self.chess_core.get_board_image())
             if cv2.waitKey(33) == ord('q'):
+                logger.info("Terminating ... \n\n\n")
                 break
 
 

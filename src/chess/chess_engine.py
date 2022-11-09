@@ -1,10 +1,13 @@
 from stockfish import Stockfish
 from src.chess.chess_visualizer import ChessVisualizer
+from src.logger.log import LoggerService
+
+logger = LoggerService.get_instance()
 
 
-class ChessEngine():
-    def __init__(self, stockfish_path, elo_rating=1300) -> None:
-        self.visualizer = ChessVisualizer()
+class ChessEngine:
+    def __init__(self, stockfish_path, elo_rating=1300, engine_side="BLACK") -> None:
+        self.visualizer = ChessVisualizer(engine_side=engine_side)
         self.stockfish = Stockfish(path=stockfish_path)
         self.stockfish.set_elo_rating(elo_rating)
 
@@ -17,7 +20,7 @@ class ChessEngine():
             self.stockfish.make_moves_from_current_position([move])
             self.visualizer.make_move(move)
         else:
-            print(f"Move {move} is not valid.")
+            logger.info(f"Move {move} is not valid.")
 
     def get_board(self, white_side=True):
         return self.stockfish.get_board_visual(white_side)

@@ -1,5 +1,8 @@
 import cv2
 from src.utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made
+from src.logger.log import LoggerService
+
+logger = LoggerService.get_instance()
 
 
 class VisionCore:
@@ -35,25 +38,32 @@ class VisionCore:
                                ['g8', 'g7', 'g6', 'g5', 'g4', 'g3', 'g2', 'g1']]
 
     def capture_image(self):
+        logger.info("Capturing image")
         image = None  # TODO: Get from camera
         return self.fake_images.pop(0)
 
     def update_images(self):
+        logger.info("Updating images")
         self.previous_image = self.current_image
         self.current_image = self.capture_image()
 
     def capture_initial_chessboard_layout(self):
+        logger.info("Capturing initial board layout")
         self.current_image = self.capture_image()  # Called when pieces are set
+        logger.info("Done capturing initial board layout")
 
     def calibrate(self):
+        logger.info("Calibrating board")
         self.empty_board_image = self.capture_image()  # Capture empty board and set it as
         image_write = self.empty_board_image.copy()
 
         self.squares, self.matrix_2d, calibration_b, calibration_w, calibration_bw, calibration_processed = get_image_information(
             self.empty_board_image, image_write, self.hsv_min_b, self.hsv_max_b,
             self.hsv_min_w, self.hsv_max_w)
+        logger.info("Done calibrating board")
 
     def get_user_move(self) -> str:
+        logger.info("Detecting user move")
         if self.current_image.shape != self.previous_image.shape:
             # TODO: Warp and crop
             print(f"Reshaping self.current_image from {self.current_image.shape} to {self.previous_image.shape}")
@@ -75,7 +85,7 @@ class VisionCore:
         move_string = ''
         for move in move_index:
             move_string += f"{self.chessboard_map[move[0]][move[1]]}"
-            print(f"Move {self.chessboard_map[move[0]][move[1]]}")
 
         self.last_user_move = move_string
+        logger.info(f"User moved {move_string}")
         return move_string
