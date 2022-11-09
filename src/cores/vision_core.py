@@ -11,6 +11,7 @@ class VisionCore():
         self.current_image = None
         self.previous_image = None
         self.empty_board_image = None
+        self.last_user_move = None
 
         self.squares = None
         self.matrix_2d = None
@@ -19,6 +20,11 @@ class VisionCore():
         self.hsv_max_b = hsv_max_b
         self.hsv_min_w = hsv_min_w
         self.hsv_max_w = hsv_max_w
+
+        empty_image = cv2.imread('src/assets/moves/empty_lichess2.png')
+        imageA = cv2.imread('src/assets/moves/lichess2_1.png')
+        imageB = cv2.imread('src/assets/moves/lichess2_2.png')
+        self.fake_images = [empty_image, imageA, imageB]
 
         self.chessboard_map = [['a8', 'a7', 'a6', 'a5', 'a4', 'a3', 'a2', 'a1'],
                                ['b8', 'b7', 'b6', 'b5', 'b4', 'b3', 'b2', 'b1'],
@@ -30,7 +36,7 @@ class VisionCore():
 
     def capture_image(self):
         image = None  # TODO: Get from camera
-        return 1
+        return self.fake_images.pop(0)
 
     def update_images(self):
         self.previous_image = self.current_image
@@ -39,12 +45,12 @@ class VisionCore():
     def capture_initial_chessboard_layout(self):
         self.current_image = self.capture_image()  # Called when pieces are set
 
-    def calibrate(self, empty_board_image):
+    def calibrate(self):
         self.empty_board_image = self.capture_image()  # Capture empty board and set it as
         image_write = self.empty_board_image.copy()
 
         self.squares, self.matrix_2d, calibration_b, calibration_w, calibration_bw, calibration_processed = get_image_information(
-            empty_board_image, image_write, self.hsv_min_b, self.hsv_max_b,
+            self.empty_board_image, image_write, self.hsv_min_b, self.hsv_max_b,
             self.hsv_min_w, self.hsv_max_w)
 
     def get_user_move(self) -> str:
@@ -71,4 +77,5 @@ class VisionCore():
             move_string += f"{self.chessboard_map[move[0]][move[1]]}"
             print(f"Move {self.chessboard_map[move[0]][move[1]]}")
 
+        self.last_user_move = move_string
         return move_string
