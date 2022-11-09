@@ -1,8 +1,7 @@
 from skimage.metrics import structural_similarity as compare_ssim
 import cv2
 import imutils
-from src.utils.cv_utils import concat_images, get_hsv_canny, get_center_points, reduce_points, \
-    corner_points_to_2d_matrix, corner_points_to_squares, get_each_square_diff, get_move_made,get_images_diff
+from src.utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made
 import numpy as np
 
 chessboard_map = [['a8', 'a7', 'a6', 'a5', 'a4', 'a3', 'a2', 'a1'],
@@ -28,8 +27,9 @@ class MoveDetector():
 
 if __name__ == "__main__":
     # load the two input images
-    imageA = cv2.imread('src/assets/moves/move2-1.png')
-    imageB = cv2.imread('src/assets/moves/move2-2.png')
+    empty_image = cv2.imread('src/assets/moves/lichess_empty.png')
+    imageA = cv2.imread('src/assets/moves/lichess_1.png')
+    imageB = cv2.imread('src/assets/moves/lichess_2.png')
 
     if imageA.shape != imageB.shape:
         print(imageA.shape)
@@ -41,68 +41,38 @@ if __name__ == "__main__":
 
     print(imageA.shape)
     print(imageB.shape)
-    imageA_copy = imageA.copy()
-    imageB_copy = imageB.copy()
 
-    lwr_b = np.array([0, 69, 0])
-    upr_b = np.array([179, 245, 255])
-    lwr_w = np.array([0, 0, 146])
-    upr_w = np.array([179, 66, 234])
+    # Lichess White and Blue board
+    hsv_min_b = np.array([0, 69, 0])
+    hsv_max_b = np.array([179, 245, 255])
+    hsv_min_w = np.array([0, 0, 146])
+    hsv_max_w = np.array([179, 66, 234])
 
-    # For image A
-    res1A = get_hsv_canny(imageA, lwr_b, upr_b)
-    res2A = get_hsv_canny(imageA, lwr_w, upr_w)
-    resA = cv2.bitwise_or(res1A, res2A)
-    center_points, corner_points, processed_image = [], [], []
-    default_lower_area = 4000
-    while len(center_points) != 64:
-        center_points, corner_points, processed_image = get_center_points(resA, lower_area=default_lower_area)
-        if len(center_points) != 64:
-            default_lower_area -= 500
-    print(f"Best default lower area {default_lower_area}")
-    center_points, corner_points, processed_image = get_center_points(resA, lower_area=2000, draw_points=True,
-                                                                      draw_contours=True, image=imageA_copy)
-    corner_points = reduce_points(corner_points)
-    center_points = reduce_points(center_points)
-    print(len(center_points))
-    assert len(center_points) == 64
-    assert len(corner_points) == 81
-    matrix_2dA = corner_points_to_2d_matrix(corner_points)
-    squaresA = corner_points_to_squares(matrix_2dA, with_text=True, image=imageA_copy)
+    # Lounge brown and white board
+    # hsv_min_b = np.array([0, 0, 122])
+    # hsv_max_b = np.array([74, 87, 255])
+    # hsv_min_w = np.array([7, 0, 0])
+    # hsv_max_w = np.array([93, 255, 124])
 
-    # For image B
-    res1B = get_hsv_canny(imageB, lwr_b, upr_b)
-    res2B = get_hsv_canny(imageB, lwr_w, upr_w)
-    resB = cv2.bitwise_or(res1B, res2B)
-    center_points, corner_points, processed_image = [], [], []
-    default_lower_area = 4000
-    while len(center_points) != 64:
-        center_points, corner_points, processed_image = get_center_points(resB, lower_area=default_lower_area)
-        if len(center_points) != 64:
-            default_lower_area -= 500
-    print(f"Best default lower area {default_lower_area}")
-    center_points, corner_points, processed_image = get_center_points(resB, lower_area=2000, draw_points=True,
-                                                                      draw_contours=True, image=imageB_copy)
-    corner_points = reduce_points(corner_points)
-    center_points = reduce_points(center_points)
-    print(len(center_points))
-    assert len(center_points) == 64
-    assert len(corner_points) == 81
-    matrix_2dB = corner_points_to_2d_matrix(corner_points)
-    print(matrix_2dB)
-    squaresB = corner_points_to_squares(matrix_2dB, with_text=True, image=imageB_copy)
+    image_write = imageA.copy()
+    squares, matrix_2d, calibraion_b, calibraion_w, calibraion_bw, calibraion_processed = get_image_information(
+        empty_image, image_write, hsv_min_b, hsv_max_b,
+        hsv_min_w, hsv_max_w)
 
-    squares_with_differences = get_each_square_diff(imageA, imageB, squaresA, squaresB, threshold=0.1, show_box=True,
-                                                    image=imageA_copy)
+    print(squares)
+    # Difference between snapshots
 
-    move_index = get_move_made(squares_with_differences, matrix_2dA)
+    squares_with_differences, squares_differences = get_each_square_diff(imageA, imageB, squares, threshold=0.8,
+                                                                         show_box=True,
+                                                                         image=image_write)
+
+    move_index = get_move_made(squares_with_differences, matrix_2d)
     for move in move_index:
         print(f"Move {chessboard_map[move[0]][move[1]]}")
 
-
-    images_to_show = [imageA_copy, imageB_copy, res1A, res2A, resA, res1B, res2B, resB, processed_image]
-    images_titles = ["imageA", "imageB", "res1A-b", "res2A-w", "resA-tot", "res1B-b", "res2B-w", "resB-tot",
-                     "processed_image"]
+    images_to_show = [image_write, calibraion_b, calibraion_w, calibraion_bw, calibraion_processed, squares_differences]
+    images_titles = ['image_copy', 'calibraion_b', 'calibraion_w', 'calibraion_bw', 'calibraion_processed',
+                     'squares_differences']
     final_image = concat_images(images_to_show, images_titles)
     cv2.imshow("final_image", final_image)
 
