@@ -2,7 +2,7 @@ import cv2
 from src.utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made
 
 
-class VisionCore():
+class VisionCore:
     def __init__(self,
                  hsv_min_b,
                  hsv_max_b,
