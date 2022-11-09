@@ -265,6 +265,37 @@ def get_move_made(squares_with_differences, matrix_2d):
     return move_index
 
 
+# Get squares and coordinates from image
+def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, board_percentage=0.35):
+    # Get HSV canny for White and Black squares and OR them
+    res_b = get_hsv_canny(image, hsv_min_b, hsv_max_b)
+    res_w = get_hsv_canny(image, hsv_min_w, hsv_max_w)
+    res_bw = cv2.bitwise_or(res_b, res_w)
+
+    # Estimate minium area of square
+    image_area = image.shape[0] * image.shape[1]
+    square_area = image_area * board_percentage / 64
+    print(f"Square area {square_area}")
+
+    # Get center points, corner points and processed image
+    center_points, corner_points, processed_image = get_center_points(res_bw, lower_area=square_area,
+                                                                      draw_points=True,
+                                                                      draw_contours=True, image=image_write)
+    # Reduce points
+    corner_points = reduce_points(corner_points)
+    center_points = reduce_points(center_points)
+    print(f"Number of center points: {len(center_points)}, Number of corner points {len(corner_points)}")
+    # assert len(center_points) == 64
+    # assert len(corner_points) == 81
+    squares = None
+    matrix_2d = None
+    if len(corner_points) == 81:
+        matrix_2d = corner_points_to_2d_matrix(corner_points)
+        squares = corner_points_to_squares(matrix_2d, with_text=True, image=image_write)
+
+    return squares, matrix_2d, res_b, res_w, res_bw, processed_image
+
+
 # Sort array of points based on x then y
 def sort_array_of_points(points):
     points = sorted(points, key=lambda x: x[0])
