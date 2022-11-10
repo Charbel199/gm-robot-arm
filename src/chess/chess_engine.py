@@ -1,8 +1,13 @@
 from stockfish import Stockfish
+from src.chess.chess_visualizer import ChessVisualizer
+from src.logger.log import LoggerService
+
+logger = LoggerService.get_instance()
 
 
-class ChessEngine():
-    def __init__(self, stockfish_path, elo_rating=1300) -> None:
+class ChessEngine:
+    def __init__(self, stockfish_path, elo_rating=1300, engine_side="BLACK") -> None:
+        self.visualizer = ChessVisualizer(engine_side=engine_side)
         self.stockfish = Stockfish(path=stockfish_path)
         self.stockfish.set_elo_rating(elo_rating)
 
@@ -13,20 +18,25 @@ class ChessEngine():
     def make_move(self, move):
         if (self.stockfish.is_move_correct(move)):
             self.stockfish.make_moves_from_current_position([move])
+            self.visualizer.make_move(move)
         else:
-            print(f"Move {move} is not valid.")
-    
-    def get_board(self,white_side = True):
+            logger.info(f"Move {move} is not valid.")
+
+    def get_board(self, white_side=True):
         return self.stockfish.get_board_visual(white_side)
+
+    def get_board_image(self):
+        return self.visualizer.get_board_image()
 
     def get_next_best_move(self):
         return self.stockfish.get_best_move()
 
-    def get_piece(self,position):
+    def get_piece(self, position):
         return self.stockfish.get_what_is_on_square(position)
 
-    def get_type_of_move(self,move):
+    def get_type_of_move(self, move):
         return self.stockfish.will_move_be_a_capture(move)
+
 
 if __name__ == "__main__":
     stockfish_path = "/home/charbel199/projs/gm-robot-arm/src/assets/engine/stockfish"
