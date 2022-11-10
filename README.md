@@ -7,6 +7,11 @@ The main flow of this robot arm would be:
     - Choose the next best move using a chess engine
     - Perform this move through autonomous control of the robot arm
 
+## General architecture
+
+![](docs/gm-robot-arm.first_diagram.svg)
+
+
 ## Software Components
 
 - Stockfish
