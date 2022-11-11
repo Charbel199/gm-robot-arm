@@ -18,10 +18,10 @@ class GMCore:
         logger.info(self.get_instructions())
 
         # Lichess White and Blue board
-        hsv_min_b = np.array([0, 69, 0])
-        hsv_max_b = np.array([179, 245, 255])
-        hsv_min_w = np.array([0, 0, 146])
-        hsv_max_w = np.array([179, 66, 234])
+        # hsv_min_b = np.array([0, 69, 0])
+        # hsv_max_b = np.array([179, 245, 255])
+        # hsv_min_w = np.array([0, 0, 146])
+        # hsv_max_w = np.array([179, 66, 234])
 
         # Lounge brown and white board
         # hsv_min_b = np.array([0, 0, 122])
@@ -29,8 +29,21 @@ class GMCore:
         # hsv_min_w = np.array([7, 0, 0])
         # hsv_max_w = np.array([93, 255, 124])
 
+        # Lounge black and white board
+        hsv_min_b = np.array([0, 0, 0])
+        hsv_max_b = np.array([27, 241, 90])
+        hsv_min_w = np.array([0, 0, 84])
+        hsv_max_w = np.array([176, 152, 255])
+
+
+        # Red markers
+        hsv_min_marker = np.array([0, 177, 240])
+        hsv_max_marker = np.array([107, 255, 255])
+
+
+
         load_dotenv(find_dotenv())
-        self.vision_core = VisionCore(hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w)
+        self.vision_core = VisionCore(hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, hsv_min_marker, hsv_max_marker)
         self.control_core = ControlCore()
         self.chess_core = ChessCore(engine_side="WHITE")
 
@@ -76,23 +89,28 @@ class GMCore:
         logger.info("Done performing automatic move")
 
     def on_user_move(self):
-        self.vision_core.update_images()
-        user_move = self.vision_core.get_user_move()
-        # TODO: Update move based on positions
-        # ...
-        self.chess_core.update_board(user_move)
+        try:
+            self.vision_core.update_images()
+            user_move = self.vision_core.get_user_move()
+            # TODO: Update move based on positions
+            # ...
+            self.chess_core.update_board(user_move)
 
-        arm_move = self.chess_core.get_next_best_move()
-
-        # TODO: Call control core to make the next move
-        # ...
-
-        self.chess_core.update_board(arm_move)
+            # arm_move = self.chess_core.get_next_best_move()
+            #
+            # # TODO: Call control core to make the next move
+            # # ...
+            #
+            # self.chess_core.update_board(arm_move)
+        except Exception:
+            # Catch Illegal move exception
+            # Reset previous board images
+            print("Exception")
 
     def spin(self):
         logger.info(f'Spinning ...')
         while True:
-            cv2.imshow('Board ', self.chess_core.get_board_image())
+            # cv2.imshow('Board ', self.chess_core.get_board_image())
             if cv2.waitKey(33) == ord('q'):
                 logger.info("Terminating ... \n\n\n")
                 break
