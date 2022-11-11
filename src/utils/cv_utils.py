@@ -102,7 +102,6 @@ def get_center_points(canny, lower_area=4500, upper_area=5650, draw_points=False
     corner_points = []
     for c in contours:
         area = cv2.contourArea(c)
-
         if lower_area < area < upper_area:
             (x, y, w, h) = cv2.boundingRect(c)
             corner_1 = (x, y)
@@ -191,12 +190,19 @@ def corner_points_to_squares(points, size=8, with_text=False, image=None):
 # Get difference between grayscale images
 def get_images_diff_histograms(imgA, imgB):
     hist1A = cv2.calcHist([imgA], [0], None, [256], [0, 256])
+    cv2.normalize(hist1A, hist1A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist2A = cv2.calcHist([imgA], [1], None, [256], [0, 256])
+    cv2.normalize(hist2A, hist2A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist3A = cv2.calcHist([imgA], [2], None, [256], [0, 256])
+    cv2.normalize(hist3A, hist3A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
     hist1B = cv2.calcHist([imgB], [0], None, [256], [0, 256])
+    cv2.normalize(hist1B, hist1B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist2B = cv2.calcHist([imgB], [1], None, [256], [0, 256])
+    cv2.normalize(hist2B, hist2B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist3B = cv2.calcHist([imgB], [2], None, [256], [0, 256])
+    cv2.normalize(hist3B, hist3B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+
     score1 = cv2.compareHist(hist1A, hist1B, cv2.HISTCMP_CORREL)
     score2 = cv2.compareHist(hist2A, hist2B, cv2.HISTCMP_CORREL)
     score3 = cv2.compareHist(hist3A, hist3B, cv2.HISTCMP_CORREL)
@@ -224,10 +230,10 @@ def get_images_diff_legacy(grayA, grayB, lower_area=1500, upper_area=5650, with_
 # Get difference between each chessboard square
 def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False, image=None):
     squares_with_differences = []
-
     squares_to_show = []
     squares_to_show_titles = []
 
+    scores = []
     for i in range(len(squares)):
         s = squares[i]
         x1, y1 = s[0]
@@ -237,17 +243,31 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         square2 = imageB[y1:y2, x1:x2]
 
         score = get_images_diff_histograms(square1, square2)
+        scores.append(score)
+        print(f"Index {i}: {score}")
 
-        if score < threshold:
-            squares_with_differences.append(s)
 
-            squares_to_show.append(square1)
-            squares_to_show.append(square2)
-            squares_to_show_titles.append(f"{i} {str(score)} A")
-            squares_to_show_titles.append(f"{i} {str(score)} B")
+    scores, squares = zip(*sorted(zip(scores, squares)))
 
-            if show_box:
-                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    main_scores = scores[0:4]
+    main_squares = squares[0:4]
+
+    for i, score in enumerate(main_scores):
+
+        s = main_squares[i]
+        x1, y1 = s[0]
+        x2, y2 = s[2]
+
+        square1 = imageA[y1:y2, x1:x2]
+        square2 = imageB[y1:y2, x1:x2]
+        squares_with_differences.append(s)
+        squares_to_show.append(square1)
+        squares_to_show.append(square2)
+        squares_to_show_titles.append(f"{i} {str(score)} A")
+        squares_to_show_titles.append(f"{i} {str(score)} B")
+
+        if show_box:
+            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
     squares_differences_images = concat_images(squares_to_show, squares_to_show_titles, force_row_size=2, fontScale=2)
 
@@ -266,7 +286,7 @@ def get_move_made(squares_with_differences, matrix_2d):
                     pass
 
         i, j = index_2d(matrix_2d, d[0])
-        move_index.append((i, j))
+        move_index.append([i, j])
     return move_index
 
 
