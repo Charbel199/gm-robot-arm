@@ -72,8 +72,8 @@ def concat_images(images, titles, force_row_size=None, with_titles=True, width=N
     return final_image
 
 
-# Get canny image based on hsv lower and upper bounds
-def get_hsv_canny(image, lower, upper):
+# Get HSV filter
+def get_hsv_filter(image, lower, upper):
     # Extract chess-board lines
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     msk = cv2.inRange(hsv, lower, upper)
@@ -81,6 +81,13 @@ def get_hsv_canny(image, lower, upper):
     dlt = cv2.dilate(msk, krn, iterations=5)
     res = cv2.bitwise_and(dlt, msk)
     res = np.uint8(res)
+    return res
+
+
+# Get canny image based on hsv lower and upper bounds
+def get_hsv_canny(image, lower, upper):
+    # Extract chess-board lines
+    res = get_hsv_filter(image, lower, upper)
     res1 = cv2.Canny(res, 38, 38 * 3)
     return res1
 
@@ -264,7 +271,7 @@ def get_move_made(squares_with_differences, matrix_2d):
 
 
 # Get squares and coordinates from image
-def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, board_percentage=0.35):
+def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, board_percentage=0.8):
     # Get HSV canny for White and Black squares and OR them
     res_b = get_hsv_canny(image, hsv_min_b, hsv_max_b)
     res_w = get_hsv_canny(image, hsv_min_w, hsv_max_w)
@@ -272,11 +279,13 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
 
     # Estimate minium area of square
     image_area = image.shape[0] * image.shape[1]
-    square_area = image_area * board_percentage / 64
-    logger.debug(f"Square area {square_area}")
+    min_square_area = image_area * board_percentage / 64
+    max_square_area = min_square_area * 1.3
+    logger.debug(f"Square area between {min_square_area} and {max_square_area}")
 
     # Get center points, corner points and processed image
-    center_points, corner_points, processed_image = get_center_points(res_bw, lower_area=square_area,
+    center_points, corner_points, processed_image = get_center_points(res_bw, lower_area=min_square_area,
+                                                                      upper_area=max_square_area,
                                                                       draw_points=True,
                                                                       draw_contours=True, image=image_write)
     # Reduce points
@@ -296,6 +305,7 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
 
 # Sort array of points based on x then y
 def sort_array_of_points(points):
+    # TODO: Doesnt work if not similar x for resorting in y
     points = sorted(points, key=lambda x: x[0])
     points = sorted(points, key=lambda x: x[1])
     return points
