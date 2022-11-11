@@ -23,7 +23,7 @@ class ChessVisualizer:
         self.current_svg = chess.svg.board(self.board, flipped=self.engine_side == "BLACK")
         png = svg2png(bytestring=self.current_svg)
         pil_img = Image.open(BytesIO(png)).convert('RGBA')
-        self.current_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGBA2BGRA)
+        self.current_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGBA2BGR)
         return self.current_img
 
     def save_board(self, path):

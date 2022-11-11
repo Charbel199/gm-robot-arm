@@ -20,6 +20,7 @@ class VisionCore:
         self.empty_board_image = None
         self.last_user_move = None
         self.calibrated_image = None
+        self.images_to_show = None
 
         self.height, self.width = 600, 600
         self.image_buffer_size = 6
@@ -89,6 +90,13 @@ class VisionCore:
 
         return out
 
+    def visualize_all_images(self):
+        self.images_to_show = self.images
+        logger.info("Set images to show")
+
+    def visualize_last_move(self):
+        pass
+
     def capture_image(self):
         logger.info("Capturing image")
         image = None  # TODO: Get from camera
@@ -136,6 +144,7 @@ class VisionCore:
                                                                                     show_box=True,
                                                                                     # image=image_write
                                                                                     )
+
 
         move_index = get_move_made(squares_with_differences, self.matrix_2d)
         move_string = ''

@@ -6,6 +6,7 @@ from pynput.keyboard import Key
 from pynput import keyboard
 import numpy as np
 import cv2
+from src.utils.cv_utils import concat_images
 from src.logger.log import LoggerService
 
 logger = LoggerService.get_instance()
@@ -38,7 +39,7 @@ class GMCore:
 
         # Red markers
         hsv_min_marker = np.array([0, 177, 240])
-        hsv_max_marker = np.array([107, 255, 255])
+        hsv_max_marker = np.array([98, 255, 255])
 
 
 
@@ -73,6 +74,8 @@ class GMCore:
                 self.on_initial_board()
             if key.char == 'm':
                 self.random_move()
+            if key.char == 'v':
+                self.vision_core.visualize_all_images()
         if key == Key.space:
             logger.info(f"Key 'space' was pressed")
             self.on_user_move()
@@ -110,7 +113,13 @@ class GMCore:
     def spin(self):
         logger.info(f'Spinning ...')
         while True:
-            # cv2.imshow('Board ', self.chess_core.get_board_image())
+            images_to_show = [self.chess_core.get_board_image()]
+            if self.vision_core.images_to_show is not None:
+                images_to_show.extend(self.vision_core.images_to_show)
+
+            labels = [str(i) for i in range(len(images_to_show))]
+            images = concat_images(images_to_show, labels)
+            cv2.imshow('Images ', images)
             if cv2.waitKey(33) == ord('q'):
                 logger.info("Terminating ... \n\n\n")
                 break
