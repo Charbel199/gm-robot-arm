@@ -27,6 +27,8 @@ class VisionCore:
 
         self.squares = None
         self.cached_marker_centers = None
+        self.cached_squares_differences_images = None
+        self.cached_image_last_move = None
         self.matrix_2d = None
 
         self.hsv_min_b = hsv_min_b
@@ -91,11 +93,22 @@ class VisionCore:
         return out
 
     def visualize_all_images(self):
-        self.images_to_show = self.images
-        logger.info("Set images to show")
+        try:
+            self.images_to_show = [self.calibrated_image]
+            self.images_to_show.extend(self.images.copy())
+            logger.info("Set all images to visualize")
+        except Exception:
+            self.images_to_show = None
 
     def visualize_last_move(self):
-        pass
+        try:
+            self.images_to_show = [self.calibrated_image]
+            self.images_to_show.append(self.images[-1].copy())
+            self.images_to_show.append(self.cached_image_last_move)
+            self.images_to_show.append(self.cached_squares_differences_images)
+            logger.info("Set last move images to visualize")
+        except Exception:
+            self.images_to_show = None
 
     def capture_image(self):
         logger.info("Capturing image")
@@ -137,15 +150,17 @@ class VisionCore:
             self.images[-2] = cv2.resize(self.images[-2], up_points, interpolation=cv2.INTER_LINEAR)
 
         # Difference between snapshots
+        image_write = self.images[-1].copy()
         squares_with_differences, squares_differences_images = get_each_square_diff(self.images[-2],
                                                                                     self.images[-1],
                                                                                     self.squares,
                                                                                     threshold=0.4,
                                                                                     show_box=True,
-                                                                                    # image=image_write
+                                                                                    image=image_write
                                                                                     )
 
-
+        self.cached_squares_differences_images = squares_differences_images
+        self.cached_image_last_move = image_write
         move_index = get_move_made(squares_with_differences, self.matrix_2d)
         move_string = ''
         for move in move_index:

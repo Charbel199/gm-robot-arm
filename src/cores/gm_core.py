@@ -76,6 +76,8 @@ class GMCore:
                 self.random_move()
             if key.char == 'v':
                 self.vision_core.visualize_all_images()
+            if key.char == 'b':
+                self.vision_core.visualize_last_move()
         if key == Key.space:
             logger.info(f"Key 'space' was pressed")
             self.on_user_move()
