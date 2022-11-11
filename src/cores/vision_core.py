@@ -37,6 +37,37 @@ class VisionCore:
                                ['f8', 'f7', 'f6', 'f5', 'f4', 'f3', 'f2', 'f1'],
                                ['g8', 'g7', 'g6', 'g5', 'g4', 'g3', 'g2', 'g1']]
 
+    def preprocess_image(self, image):
+        res = get_hsv_filter(image, self.hsv_min_marker, self.hsv_max_marker)
+        res = cv2.dilate(res, np.ones((3, 3), np.uint8))
+        contours, hierarchy = cv2.findContours(res, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        marker_centers = []
+        for c in contours:
+            if cv2.contourArea(c) > 30:
+                (x, y, w, h) = cv2.boundingRect(c)
+                marker_centers.append([int(x + w / 2), int(y + h / 2)])
+
+        if len(marker_centers) == 4:
+            marker_centers = get_four_corners(marker_centers)
+            self.cached_marker_centers = marker_centers
+        else:
+            marker_centers = self.cached_marker_centers
+
+        # to calculate the transformation matrix
+        input_pts = np.float32(marker_centers)
+        output_pts = np.float32([[0, 0],
+                                 [0, self.height],
+                                 [self.width, self.height],
+                                 [self.width, 0]])
+
+        # Compute the perspective transform
+        transform = cv2.getPerspectiveTransform(input_pts, output_pts)
+
+        # Apply the perspective transformation to the image
+        out = cv2.warpPerspective(image, transform, (self.width, self.height))
+
+        return out
+
     def capture_image(self):
         logger.info("Capturing image")
         image = None  # TODO: Get from camera
