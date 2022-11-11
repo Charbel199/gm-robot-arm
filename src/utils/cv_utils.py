@@ -299,3 +299,16 @@ def sort_array_of_points(points):
     points = sorted(points, key=lambda x: x[0])
     points = sorted(points, key=lambda x: x[1])
     return points
+
+
+def get_four_corners(points):
+    points_x = sorted(points, key=lambda x: x[0])
+    top_points = points_x[0:2]
+    bottom_points = points_x[2:4]
+    sorted_top_points = sorted(top_points, key=lambda x: x[1])
+    sorted_bottom_points = sorted(bottom_points, key=lambda x: x[1])
+    point_1 = sorted_top_points[0]
+    point_2 = sorted_top_points[1]
+    point_3 = sorted_bottom_points[1]
+    point_4 = sorted_bottom_points[0]
+    return [point_1, point_2, point_3, point_4]
