@@ -103,7 +103,7 @@ class VisionCore:
     def visualize_last_move(self):
         try:
             self.images_to_show = [self.calibrated_image]
-            self.images_to_show.append(self.images[-1].copy())
+            self.images_to_show.append(self.images[-2].copy())
             self.images_to_show.append(self.cached_image_last_move)
             self.images_to_show.append(self.cached_squares_differences_images)
             logger.info("Set last move images to visualize")
