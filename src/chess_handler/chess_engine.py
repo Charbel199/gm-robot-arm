@@ -1,6 +1,6 @@
 from stockfish import Stockfish
-from src.chess.chess_visualizer import ChessVisualizer
-from src.logger.log import LoggerService
+from chess_handler.chess_visualizer import ChessVisualizer
+from logger.log import LoggerService
 
 logger = LoggerService.get_instance()
 
