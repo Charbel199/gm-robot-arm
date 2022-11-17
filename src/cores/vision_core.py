@@ -42,21 +42,21 @@ class VisionCore:
 
 
 
-        # empty_image = cv2.imread('src/assets/moves/real_board/Move_Empty2.jpeg')
-        # initial_image = cv2.imread('src/assets/moves/real_board/Move_Initial.jpeg')
-        # image1 = cv2.imread('src/assets/moves/real_board/Move1.jpeg')
-        # image2 = cv2.imread('src/assets/moves/real_board/Move2.jpeg')
-        # image3 = cv2.imread('src/assets/moves/real_board/Move3.jpeg')
-        # image4 = cv2.imread('src/assets/moves/real_board/Move4.jpeg')
-        # image5 = cv2.imread('src/assets/moves/real_board/Move5.jpeg')
+        # empty_image = cv2.imread('assets/moves/real_board/Move_Empty2.jpeg')
+        # initial_image = cv2.imread('assets/moves/real_board/Move_Initial.jpeg')
+        # image1 = cv2.imread('assets/moves/real_board/Move1.jpeg')
+        # image2 = cv2.imread('assets/moves/real_board/Move2.jpeg')
+        # image3 = cv2.imread('assets/moves/real_board/Move3.jpeg')
+        # image4 = cv2.imread('assets/moves/real_board/Move4.jpeg')
+        # image5 = cv2.imread('assets/moves/real_board/Move5.jpeg')
         #
         # self.fake_images = [empty_image, initial_image, image1, image2, image3, image4, image5]
 
 
-        empty_image = cv2.imread('src/assets/moves/real_board/Move_Empty2.jpeg')
-        initial_image = cv2.imread('src/assets/moves/real_board/colored/Move_Initial.jpeg')
-        image1 = cv2.imread('src/assets/moves/real_board/colored/Move1.jpeg')
-        image2 = cv2.imread('src/assets/moves/real_board/colored/Move2.jpeg')
+        empty_image = cv2.imread('assets/moves/real_board/Move_Empty2.jpeg')
+        initial_image = cv2.imread('assets/moves/real_board/colored/Move_Initial.jpeg')
+        image1 = cv2.imread('assets/moves/real_board/colored/Move1.jpeg')
+        image2 = cv2.imread('assets/moves/real_board/colored/Move2.jpeg')
 
         self.fake_images = [empty_image, initial_image, image1, image2]
 

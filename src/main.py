@@ -4,5 +4,5 @@ import sys
 
 sys.path.append('../')
 
-core = GMCore(use_camera=os.getenv('USE_CAMERA'))
+core = GMCore(use_camera=int(os.getenv('USE_CAMERA')))
 core.spin()
