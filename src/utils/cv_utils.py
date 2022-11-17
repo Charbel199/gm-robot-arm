@@ -38,7 +38,7 @@ def concat_images(images, titles, force_row_size=None, with_titles=True, width=N
     for i, image in enumerate(images):
         # Make all images 3 channels
         images[i] = np.stack((image,) * 3, axis=-1) if len(image.shape) < 3 else image
-        if images[i].shape != (width, height, 3):
+        if images[i].shape != (height, width, 3):
             up_points = (width, height)
             images[i] = cv2.resize(images[i], up_points, interpolation=cv2.INTER_AREA)
         image = images[i]
@@ -203,8 +203,6 @@ def get_images_diff_histograms(imgA, imgB):
     hist3B = cv2.calcHist([imgB], [2], None, [256], [0, 256])
     # cv2.normalize(hist3B, hist3B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
-
-
     score1 = cv2.compareHist(hist1A, hist1B, cv2.HISTCMP_CORREL)
     score2 = cv2.compareHist(hist2A, hist2B, cv2.HISTCMP_CORREL)
     score3 = cv2.compareHist(hist3A, hist3B, cv2.HISTCMP_CORREL)
@@ -245,9 +243,12 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         square2 = imageB[y1:y2, x1:x2]
 
         score = get_images_diff_histograms(square1, square2)
+        squares_to_show.append(square1)
+        squares_to_show.append(square2)
+        squares_to_show_titles.append(f"{i} {str(score)} A")
+        squares_to_show_titles.append(f"{i} {str(score)} B")
         scores.append(score)
         print(f"Index {i}: {score}")
-
 
     scores, squares = zip(*sorted(zip(scores, squares)))
 
@@ -263,15 +264,11 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         square1 = imageA[y1:y2, x1:x2]
         square2 = imageB[y1:y2, x1:x2]
         squares_with_differences.append(s)
-        squares_to_show.append(square1)
-        squares_to_show.append(square2)
-        squares_to_show_titles.append(f"{i} {str(score)} A")
-        squares_to_show_titles.append(f"{i} {str(score)} B")
 
         if show_box:
             cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
-    squares_differences_images = concat_images(squares_to_show, squares_to_show_titles, force_row_size=2, fontScale=2)
+    squares_differences_images = concat_images(squares_to_show, squares_to_show_titles, with_titles=False)
 
     return squares_with_differences, squares_differences_images
 
