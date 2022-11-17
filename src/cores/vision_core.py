@@ -123,6 +123,7 @@ class VisionCore:
             image = self.fake_images.pop(0)
         else:
             image = None  # TODO: Get from camera through ROS
+            raise Exception('Camera not setup yet')
         image = self.preprocess_image(image)
         return image
 
