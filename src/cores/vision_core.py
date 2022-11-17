@@ -18,6 +18,8 @@ class VisionCore:
                  use_camera=False):
         self.images = []
         self.use_camera = use_camera
+        self._is_calibrated = False
+        self._captured_initial_board_layout = False
 
         self.empty_board_image = None
         self.last_user_move = None
@@ -40,8 +42,6 @@ class VisionCore:
         self.hsv_min_marker = hsv_min_marker
         self.hsv_max_marker = hsv_max_marker
 
-
-
         # empty_image = cv2.imread('assets/moves/real_board/Move_Empty2.jpeg')
         # initial_image = cv2.imread('assets/moves/real_board/Move_Initial.jpeg')
         # image1 = cv2.imread('assets/moves/real_board/Move1.jpeg')
@@ -51,7 +51,6 @@ class VisionCore:
         # image5 = cv2.imread('assets/moves/real_board/Move5.jpeg')
         #
         # self.fake_images = [empty_image, initial_image, image1, image2, image3, image4, image5]
-
 
         empty_image = cv2.imread('assets/moves/real_board/Move_Empty2.jpeg')
         initial_image = cv2.imread('assets/moves/real_board/colored/Move_Initial.jpeg')
@@ -134,11 +133,19 @@ class VisionCore:
         self.images.append(self.capture_image())
 
     def capture_initial_chessboard_layout(self):
+        if self._captured_initial_board_layout:
+            logger.info("Already captured initial board layout")
+            return
         logger.info("Capturing initial board layout")
         self.update_images()  # Called when pieces are set
+        self._captured_initial_board_layout = True
         logger.info("Done capturing initial board layout")
 
     def calibrate(self):
+        if self._is_calibrated:
+            logger.info("Already calibrated")
+            return
+
         logger.info("Calibrating board")
         self.empty_board_image = self.capture_image()  # Capture empty board and set it as
         image_write = self.empty_board_image.copy()
@@ -147,6 +154,7 @@ class VisionCore:
             self.empty_board_image, image_write, self.hsv_min_b, self.hsv_max_b,
             self.hsv_min_w, self.hsv_max_w, board_percentage=0.7)
         self.calibrated_image = image_write
+        self._is_calibrated = True
         logger.info("Done calibrating board")
 
     def get_user_move(self) -> str:

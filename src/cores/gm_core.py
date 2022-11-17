@@ -105,10 +105,11 @@ class GMCore:
             # # ...
             #
             # self.chess_core.update_board(arm_move)
-        except Exception:
+        except Exception as e:
             # Catch Illegal move exception
             # Reset previous board images
             print("Exception")
+            print(e)
 
     def spin(self):
         logger.info(f'Spinning ...')
