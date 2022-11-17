@@ -40,8 +40,19 @@ class GMCore:
         hsv_min_marker = np.array([0, 177, 240])
         hsv_max_marker = np.array([98, 255, 255])
 
+        # White/Green chess pieces
+        hsv_min_greenwhite = np.array([56, 121, 184])
+        hsv_max_greenwhite = np.array([65, 255, 255])
+        # Black/Purple chess pieces
+        hsv_min_blackpurple = np.array([116, 164, 183])
+        hsv_max_blackpurple = np.array([154, 255, 255])
+
         load_dotenv(find_dotenv())
-        self.vision_core = VisionCore(hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, hsv_min_marker, hsv_max_marker,
+        self.vision_core = VisionCore(hsv_min_b, hsv_max_b,
+                                      hsv_min_w, hsv_max_w,
+                                      hsv_min_marker, hsv_max_marker,
+                                      hsv_min_greenwhite,hsv_max_greenwhite,
+                                      hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
         self.control_core = ControlCore()
         self.chess_core = ChessCore(engine_side="WHITE")
@@ -92,24 +103,20 @@ class GMCore:
         logger.info("Done performing automatic move")
 
     def on_user_move(self):
-        try:
-            self.vision_core.update_images()
-            user_move = self.vision_core.get_user_move()
-            # TODO: Update move based on positions
-            # ...
-            self.chess_core.update_board(user_move)
 
-            # arm_move = self.chess_core.get_next_best_move()
-            #
-            # # TODO: Call control core to make the next move
-            # # ...
-            #
-            # self.chess_core.update_board(arm_move)
-        except Exception as e:
-            # Catch Illegal move exception
-            # Reset previous board images
-            print("Exception")
-            print(e)
+        self.vision_core.update_images()
+        user_move = self.vision_core.get_user_move()
+        # TODO: Update move based on positions
+        # ...
+        self.chess_core.update_board(user_move)
+
+        # arm_move = self.chess_core.get_next_best_move()
+        #
+        # # TODO: Call control core to make the next move
+        # # ...
+        #
+        # self.chess_core.update_board(arm_move)
+
 
     def spin(self):
         logger.info(f'Spinning ...')
