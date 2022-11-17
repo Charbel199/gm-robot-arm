@@ -55,7 +55,7 @@ class GMCore:
                                       hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
         self.control_core = ControlCore()
-        self.chess_core = ChessCore(engine_side="WHITE")
+        self.chess_core = ChessCore(engine_side="BLACK")
 
         listener = keyboard.Listener(
             on_press=self.on_key_press)

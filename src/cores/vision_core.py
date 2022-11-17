@@ -60,8 +60,14 @@ class VisionCore:
         initial_image = cv2.imread('assets/moves/real_board/colored/Move_Initial.jpeg')
         image1 = cv2.imread('assets/moves/real_board/colored/Move1.jpeg')
         image2 = cv2.imread('assets/moves/real_board/colored/Move2.jpeg')
+        image3 = cv2.imread('assets/moves/real_board/colored/Move3.jpeg')
+        image4 = cv2.imread('assets/moves/real_board/colored/Move4.jpeg')
+        image5 = cv2.imread('assets/moves/real_board/colored/Move5.jpeg')
+        image6 = cv2.imread('assets/moves/real_board/colored/Move_BeforeCastle.jpeg')
+        image7 = cv2.imread('assets/moves/real_board/colored/Move_AfterCastle.jpeg')
+        image8 = cv2.imread('assets/moves/real_board/colored/Move_AfterCastleEnPassant.jpeg')
 
-        self.fake_images = [empty_image, initial_image, image1, image2]
+        self.fake_images = [empty_image, initial_image, image1, image2, image3, image4, image5, image6, image7, image8]
 
         self.chessboard_map = [['a8', 'a7', 'a6', 'a5', 'a4', 'a3', 'a2', 'a1'],
                                ['b8', 'b7', 'b6', 'b5', 'b4', 'b3', 'b2', 'b1'],
