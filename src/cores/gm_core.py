@@ -105,7 +105,8 @@ class GMCore:
     def on_user_move(self):
 
         self.vision_core.update_images()
-        user_move = self.vision_core.get_user_move()
+        user_squares_changed = self.vision_core.get_user_squares_changed()
+        user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
         # TODO: Update move based on positions
         # ...
         self.chess_core.update_board(user_move)

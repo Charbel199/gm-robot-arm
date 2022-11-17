@@ -250,7 +250,6 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         squares_to_show_titles.append(f"{i} {str(score)} A")
         squares_to_show_titles.append(f"{i} {str(score)} B")
         scores.append(score)
-        print(f"Index {i}: {score}")
 
     scores, squares = zip(*sorted(zip(scores, squares), reverse=True))
 
@@ -277,7 +276,7 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
 
 
 # Deduce move made based on square differences
-def get_move_made(squares_with_differences, matrix_2d):
+def get_squares_changed(squares_with_differences, matrix_2d):
     move_index = []
     for d in squares_with_differences:
         def index_2d(data, search):

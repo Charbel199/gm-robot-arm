@@ -1,8 +1,9 @@
 import cv2
-from utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made, \
+from utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_squares_changed, \
     get_hsv_filter, get_four_corners
 from logger.log import LoggerService
 import numpy as np
+from typing import List
 
 logger = LoggerService.get_instance()
 
@@ -21,7 +22,7 @@ class VisionCore:
         self._captured_initial_board_layout = False
 
         self.empty_board_image = None
-        self.last_user_move = None
+        self.last_user_squares_change = None
         self.calibrated_image = None
         self.images_to_show = None
 
@@ -161,7 +162,7 @@ class VisionCore:
         self._is_calibrated = True
         logger.info("Done calibrating board")
 
-    def get_user_move(self) -> str:
+    def get_user_squares_changed(self) -> List:
         logger.info("Detecting user move")
         if self.images[-1].shape != self.images[-2].shape:
             # TODO: Warp and crop
@@ -187,11 +188,11 @@ class VisionCore:
 
         self.cached_squares_differences_images = squares_differences_images
         self.cached_image_last_move = image_write
-        move_index = get_move_made(squares_with_differences, self.matrix_2d)
-        move_string = ''
-        for move in move_index:
-            move_string += f"{self.chessboard_map[move[0]][move[1]]}"
+        squares_index = get_squares_changed(squares_with_differences, self.matrix_2d)
+        last_user_squares_change = []
+        for square in squares_index:
+            last_user_squares_change.append(f"{self.chessboard_map[square[0]][square[1]]}")
 
-        self.last_user_move = move_string
-        logger.info(f"User moved {move_string}")
-        return move_string
+        self.last_user_squares_change = last_user_squares_change
+        logger.info(f"User changed {last_user_squares_change}")
+        return last_user_squares_change
