@@ -4,7 +4,7 @@ import imutils
 import numpy as np
 import math
 from sewar.full_ref import mse, rmse, psnr, uqi, ssim, ergas, scc, rase, sam, msssim, vifp
-from src.logger.log import LoggerService
+from logger.log import LoggerService
 
 logger = LoggerService.get_instance()
 
@@ -38,7 +38,7 @@ def concat_images(images, titles, force_row_size=None, with_titles=True, width=N
     for i, image in enumerate(images):
         # Make all images 3 channels
         images[i] = np.stack((image,) * 3, axis=-1) if len(image.shape) < 3 else image
-        if images[i].shape != (width, height, 3):
+        if images[i].shape != (height, width, 3):
             up_points = (width, height)
             images[i] = cv2.resize(images[i], up_points, interpolation=cv2.INTER_AREA)
         image = images[i]
@@ -72,15 +72,22 @@ def concat_images(images, titles, force_row_size=None, with_titles=True, width=N
     return final_image
 
 
-# Get canny image based on hsv lower and upper bounds
-def get_hsv_canny(image, lower, upper):
-    # Extract chess-board lines
+# Get HSV filter
+def get_hsv_filter(image, lower, upper):
+    # Extract chess_handler-board lines
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     msk = cv2.inRange(hsv, lower, upper)
     krn = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 30))
     dlt = cv2.dilate(msk, krn, iterations=5)
     res = cv2.bitwise_and(dlt, msk)
     res = np.uint8(res)
+    return res
+
+
+# Get canny image based on hsv lower and upper bounds
+def get_hsv_canny(image, lower, upper):
+    # Extract chess_handler-board lines
+    res = get_hsv_filter(image, lower, upper)
     res1 = cv2.Canny(res, 38, 38 * 3)
     return res1
 
@@ -95,7 +102,6 @@ def get_center_points(canny, lower_area=4500, upper_area=5650, draw_points=False
     corner_points = []
     for c in contours:
         area = cv2.contourArea(c)
-
         if lower_area < area < upper_area:
             (x, y, w, h) = cv2.boundingRect(c)
             corner_1 = (x, y)
@@ -181,46 +187,49 @@ def corner_points_to_squares(points, size=8, with_text=False, image=None):
     return squares
 
 
-# Get difference between grayscale images
-def get_images_diff_histograms(imgA, imgB):
-    hist1A = cv2.calcHist([imgA], [0], None, [256], [0, 256])
-    hist2A = cv2.calcHist([imgA], [1], None, [256], [0, 256])
-    hist3A = cv2.calcHist([imgA], [2], None, [256], [0, 256])
-
-    hist1B = cv2.calcHist([imgB], [0], None, [256], [0, 256])
-    hist2B = cv2.calcHist([imgB], [1], None, [256], [0, 256])
-    hist3B = cv2.calcHist([imgB], [2], None, [256], [0, 256])
-    score1 = cv2.compareHist(hist1A, hist1B, cv2.HISTCMP_CORREL)
-    score2 = cv2.compareHist(hist2A, hist2B, cv2.HISTCMP_CORREL)
-    score3 = cv2.compareHist(hist3A, hist3B, cv2.HISTCMP_CORREL)
-    score = (score1 + score2 + score3) / 3
-    return score
-
-
-def get_images_diff_legacy(grayA, grayB, lower_area=1500, upper_area=5650, with_box=False, image=None):
-    (score, diff) = compare_ssim(grayA, grayB, full=True)
-    diff = (diff * 255).astype("uint8")
-    thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def is_piece_found(img, threshold=200):
+    cnts = cv2.findContours(img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    final_cnts = []
-    for c in cnts:
-        area = cv2.contourArea(c)
-        if lower_area < area < upper_area:
-            final_cnts.append(c)
-            if with_box:
-                (x, y, w, h) = cv2.boundingRect(c)
-                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
-    return score, diff, thresh, cnts
+    if cnts:
+        max_area = max([cv2.contourArea(c) for c in cnts])
+        if max_area < threshold:
+            return 0
+    else:
+        return 0
+    return 1
+
+
+def get_pieces_diff(imgA, imgB, hsv_min_greenwhite, hsv_max_greenwhite,
+                    hsv_min_blackpurple, hsv_max_blackpurple, ):
+    imgA_copy = imgA.copy()
+    imgA_copy = cv2.cvtColor(imgA_copy, cv2.COLOR_BGR2HSV)
+    imgA_filter_white = cv2.inRange(imgA_copy, hsv_min_greenwhite, hsv_max_greenwhite)
+    imgA_filter_black = cv2.inRange(imgA_copy, hsv_min_blackpurple, hsv_max_blackpurple)
+
+    is_A_white = is_piece_found(imgA_filter_white) != 0
+    is_A_black = is_piece_found(imgA_filter_black) != 0
+    is_A_empty = is_piece_found(imgA_filter_white) == 0 and is_piece_found(imgA_filter_black) == 0
+
+    imgBcopy = imgB.copy()
+    imgBcopy = cv2.cvtColor(imgBcopy, cv2.COLOR_BGR2HSV)
+    imgB_filter_white = cv2.inRange(imgBcopy, hsv_min_greenwhite, hsv_max_greenwhite)
+    imgB_filter_black = cv2.inRange(imgBcopy, hsv_min_blackpurple, hsv_max_blackpurple)
+    is_B_white = is_piece_found(imgB_filter_white) != 0
+    is_B_black = is_piece_found(imgB_filter_black) != 0
+    is_B_empty = is_piece_found(imgB_filter_white) == 0 and is_piece_found(imgB_filter_black) == 0
+
+    if (is_A_white and is_B_white) or (is_A_black and is_B_black) or (is_A_empty and is_B_empty):
+        return 0
+    return 1
 
 
 # Get difference between each chessboard square
-def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False, image=None):
+def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False, image=None, **kwargs):
     squares_with_differences = []
-
     squares_to_show = []
     squares_to_show_titles = []
 
+    scores = []
     for i in range(len(squares)):
         s = squares[i]
         x1, y1 = s[0]
@@ -229,26 +238,45 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         square1 = imageA[y1:y2, x1:x2]
         square2 = imageB[y1:y2, x1:x2]
 
-        score = get_images_diff_histograms(square1, square2)
+        # score = get_images_diff_histograms(square1, square2)
 
-        if score < threshold:
-            squares_with_differences.append(s)
+        score = get_pieces_diff(square1, square2,
+                                kwargs['hsv_min_greenwhite'],
+                                kwargs['hsv_max_greenwhite'],
+                                kwargs['hsv_min_blackpurple'],
+                                kwargs['hsv_max_blackpurple'])
+        squares_to_show.append(square1)
+        squares_to_show.append(square2)
+        squares_to_show_titles.append(f"{i} {str(score)} A")
+        squares_to_show_titles.append(f"{i} {str(score)} B")
+        scores.append(score)
 
-            squares_to_show.append(square1)
-            squares_to_show.append(square2)
-            squares_to_show_titles.append(f"{i} {str(score)} A")
-            squares_to_show_titles.append(f"{i} {str(score)} B")
+    scores, squares = zip(*sorted(zip(scores, squares), reverse=True))
 
-            if show_box:
-                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    main_indices = [i for i in range(len(scores)) if scores[i] is 1]
+    main_scores = [scores[i] for i in main_indices]
+    main_squares = [squares[i] for i in main_indices]
 
-    squares_differences_images = concat_images(squares_to_show, squares_to_show_titles, force_row_size=2, fontScale=2)
+    for i, score in enumerate(main_scores):
+
+        s = main_squares[i]
+        x1, y1 = s[0]
+        x2, y2 = s[2]
+
+        square1 = imageA[y1:y2, x1:x2]
+        square2 = imageB[y1:y2, x1:x2]
+        squares_with_differences.append(s)
+
+        if show_box:
+            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+    squares_differences_images = concat_images(squares_to_show, squares_to_show_titles, with_titles=False)
 
     return squares_with_differences, squares_differences_images
 
 
 # Deduce move made based on square differences
-def get_move_made(squares_with_differences, matrix_2d):
+def get_squares_changed(squares_with_differences, matrix_2d):
     move_index = []
     for d in squares_with_differences:
         def index_2d(data, search):
@@ -259,12 +287,12 @@ def get_move_made(squares_with_differences, matrix_2d):
                     pass
 
         i, j = index_2d(matrix_2d, d[0])
-        move_index.append((i, j))
+        move_index.append([i, j])
     return move_index
 
 
 # Get squares and coordinates from image
-def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, board_percentage=0.35):
+def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, board_percentage=0.8):
     # Get HSV canny for White and Black squares and OR them
     res_b = get_hsv_canny(image, hsv_min_b, hsv_max_b)
     res_w = get_hsv_canny(image, hsv_min_w, hsv_max_w)
@@ -272,11 +300,13 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
 
     # Estimate minium area of square
     image_area = image.shape[0] * image.shape[1]
-    square_area = image_area * board_percentage / 64
-    logger.debug(f"Square area {square_area}")
+    min_square_area = image_area * board_percentage / 64
+    max_square_area = min_square_area * 1.3
+    logger.debug(f"Square area between {min_square_area} and {max_square_area}")
 
     # Get center points, corner points and processed image
-    center_points, corner_points, processed_image = get_center_points(res_bw, lower_area=square_area,
+    center_points, corner_points, processed_image = get_center_points(res_bw, lower_area=min_square_area,
+                                                                      upper_area=max_square_area,
                                                                       draw_points=True,
                                                                       draw_contours=True, image=image_write)
     # Reduce points
@@ -296,6 +326,20 @@ def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, h
 
 # Sort array of points based on x then y
 def sort_array_of_points(points):
+    # TODO: Doesnt work if not similar x for resorting in y
     points = sorted(points, key=lambda x: x[0])
     points = sorted(points, key=lambda x: x[1])
     return points
+
+
+def get_four_corners(points):
+    points_x = sorted(points, key=lambda x: x[0])
+    top_points = points_x[0:2]
+    bottom_points = points_x[2:4]
+    sorted_top_points = sorted(top_points, key=lambda x: x[1])
+    sorted_bottom_points = sorted(bottom_points, key=lambda x: x[1])
+    point_1 = sorted_top_points[0]
+    point_2 = sorted_top_points[1]
+    point_3 = sorted_bottom_points[1]
+    point_4 = sorted_bottom_points[0]
+    return [point_1, point_2, point_3, point_4]

@@ -1,6 +1,6 @@
-from src.chess.chess_engine import ChessEngine
+from chess_handler.chess_engine import ChessEngine
 import os
-from src.logger.log import LoggerService
+from logger.log import LoggerService
 
 logger = LoggerService.get_instance()
 
@@ -24,6 +24,9 @@ class ChessCore:
 
     def get_board_image(self):
         return self.engine.visualizer.get_board_image()
+
+    def deduce_move_from_squares(self, squares):
+        return self.engine.deduce_move(squares)
 
     def update_board(self, move) -> None:
         logger.info(f"Updating board with move: {move}")
