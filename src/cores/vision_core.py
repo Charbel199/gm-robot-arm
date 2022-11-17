@@ -9,12 +9,11 @@ logger = LoggerService.get_instance()
 
 class VisionCore:
     def __init__(self,
-                 hsv_min_b,
-                 hsv_max_b,
-                 hsv_min_w,
-                 hsv_max_w,
-                 hsv_min_marker,
-                 hsv_max_marker,
+                 hsv_min_b, hsv_max_b,
+                 hsv_min_w, hsv_max_w,
+                 hsv_min_marker, hsv_max_marker,
+                 hsv_min_greenwhite, hsv_max_greenwhite,
+                 hsv_min_blackpurple, hsv_max_blackpurple,
                  use_camera=False):
         self.images = []
         self.use_camera = use_camera
@@ -41,6 +40,10 @@ class VisionCore:
         self.hsv_max_w = hsv_max_w
         self.hsv_min_marker = hsv_min_marker
         self.hsv_max_marker = hsv_max_marker
+        self.hsv_min_greenwhite = hsv_min_greenwhite
+        self.hsv_max_greenwhite = hsv_max_greenwhite
+        self.hsv_min_blackpurple = hsv_min_blackpurple
+        self.hsv_max_blackpurple = hsv_max_blackpurple
 
         # empty_image = cv2.imread('assets/moves/real_board/Move_Empty2.jpeg')
         # initial_image = cv2.imread('assets/moves/real_board/Move_Initial.jpeg')
@@ -65,7 +68,8 @@ class VisionCore:
                                ['d8', 'd7', 'd6', 'd5', 'd4', 'd3', 'd2', 'd1'],
                                ['e8', 'e7', 'e6', 'e5', 'e4', 'e3', 'e2', 'e1'],
                                ['f8', 'f7', 'f6', 'f5', 'f4', 'f3', 'f2', 'f1'],
-                               ['g8', 'g7', 'g6', 'g5', 'g4', 'g3', 'g2', 'g1']]
+                               ['g8', 'g7', 'g6', 'g5', 'g4', 'g3', 'g2', 'g1'],
+                               ['h8', 'h7', 'h6', 'h5', 'h4', 'h3', 'h2', 'h1']]
 
     def preprocess_image(self, image):
         res = get_hsv_filter(image, self.hsv_min_marker, self.hsv_max_marker)
@@ -174,7 +178,11 @@ class VisionCore:
                                                                                     self.squares,
                                                                                     threshold=0.4,
                                                                                     show_box=True,
-                                                                                    image=image_write
+                                                                                    image=image_write,
+                                                                                    hsv_min_greenwhite=self.hsv_min_greenwhite,
+                                                                                    hsv_max_greenwhite=self.hsv_max_greenwhite,
+                                                                                    hsv_min_blackpurple=self.hsv_min_blackpurple,
+                                                                                    hsv_max_blackpurple=self.hsv_max_blackpurple,
                                                                                     )
 
         self.cached_squares_differences_images = squares_differences_images

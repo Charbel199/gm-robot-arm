@@ -187,48 +187,44 @@ def corner_points_to_squares(points, size=8, with_text=False, image=None):
     return squares
 
 
-# Get difference between grayscale images
-def get_images_diff_histograms(imgA, imgB):
-    hist1A = cv2.calcHist([imgA], [0], None, [256], [0, 256])
-    # cv2.normalize(hist1A, hist1A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-    hist2A = cv2.calcHist([imgA], [1], None, [256], [0, 256])
-    # cv2.normalize(hist2A, hist2A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-    hist3A = cv2.calcHist([imgA], [2], None, [256], [0, 256])
-    # cv2.normalize(hist3A, hist3A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-
-    hist1B = cv2.calcHist([imgB], [0], None, [256], [0, 256])
-    # cv2.normalize(hist1B, hist1B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-    hist2B = cv2.calcHist([imgB], [1], None, [256], [0, 256])
-    # cv2.normalize(hist2B, hist2B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-    hist3B = cv2.calcHist([imgB], [2], None, [256], [0, 256])
-    # cv2.normalize(hist3B, hist3B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
-
-    score1 = cv2.compareHist(hist1A, hist1B, cv2.HISTCMP_CORREL)
-    score2 = cv2.compareHist(hist2A, hist2B, cv2.HISTCMP_CORREL)
-    score3 = cv2.compareHist(hist3A, hist3B, cv2.HISTCMP_CORREL)
-    score = (score2 + score3)
-    return score
-
-
-def get_images_diff_legacy(grayA, grayB, lower_area=1500, upper_area=5650, with_box=False, image=None):
-    (score, diff) = compare_ssim(grayA, grayB, full=True)
-    diff = (diff * 255).astype("uint8")
-    thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def is_piece_found(img, threshold=200):
+    cnts = cv2.findContours(img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    final_cnts = []
-    for c in cnts:
-        area = cv2.contourArea(c)
-        if lower_area < area < upper_area:
-            final_cnts.append(c)
-            if with_box:
-                (x, y, w, h) = cv2.boundingRect(c)
-                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
-    return score, diff, thresh, cnts
+    if cnts:
+        max_area = max([cv2.contourArea(c) for c in cnts])
+        if max_area < threshold:
+            return 0
+    else:
+        return 0
+    return 1
+
+
+def get_pieces_diff(imgA, imgB, hsv_min_greenwhite, hsv_max_greenwhite,
+                    hsv_min_blackpurple, hsv_max_blackpurple, ):
+    imgA_copy = imgA.copy()
+    imgA_copy = cv2.cvtColor(imgA_copy, cv2.COLOR_BGR2HSV)
+    imgA_filter_white = cv2.inRange(imgA_copy, hsv_min_greenwhite, hsv_max_greenwhite)
+    imgA_filter_black = cv2.inRange(imgA_copy, hsv_min_blackpurple, hsv_max_blackpurple)
+
+    is_A_white = is_piece_found(imgA_filter_white) != 0
+    is_A_black = is_piece_found(imgA_filter_black) != 0
+    is_A_empty = is_piece_found(imgA_filter_white) == 0 and is_piece_found(imgA_filter_black) == 0
+
+    imgBcopy = imgB.copy()
+    imgBcopy = cv2.cvtColor(imgBcopy, cv2.COLOR_BGR2HSV)
+    imgB_filter_white = cv2.inRange(imgBcopy, hsv_min_greenwhite, hsv_max_greenwhite)
+    imgB_filter_black = cv2.inRange(imgBcopy, hsv_min_blackpurple, hsv_max_blackpurple)
+    is_B_white = is_piece_found(imgB_filter_white) != 0
+    is_B_black = is_piece_found(imgB_filter_black) != 0
+    is_B_empty = is_piece_found(imgB_filter_white) == 0 and is_piece_found(imgB_filter_black) == 0
+
+    if (is_A_white and is_B_white) or (is_A_black and is_B_black) or (is_A_empty and is_B_empty):
+        return 0
+    return 1
 
 
 # Get difference between each chessboard square
-def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False, image=None):
+def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False, image=None, **kwargs):
     squares_with_differences = []
     squares_to_show = []
     squares_to_show_titles = []
@@ -242,7 +238,13 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         square1 = imageA[y1:y2, x1:x2]
         square2 = imageB[y1:y2, x1:x2]
 
-        score = get_images_diff_histograms(square1, square2)
+        # score = get_images_diff_histograms(square1, square2)
+
+        score = get_pieces_diff(square1, square2,
+                                kwargs['hsv_min_greenwhite'],
+                                kwargs['hsv_max_greenwhite'],
+                                kwargs['hsv_min_blackpurple'],
+                                kwargs['hsv_max_blackpurple'])
         squares_to_show.append(square1)
         squares_to_show.append(square2)
         squares_to_show_titles.append(f"{i} {str(score)} A")
@@ -250,10 +252,11 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         scores.append(score)
         print(f"Index {i}: {score}")
 
-    scores, squares = zip(*sorted(zip(scores, squares)))
+    scores, squares = zip(*sorted(zip(scores, squares), reverse=True))
 
-    main_scores = scores[0:4]
-    main_squares = squares[0:4]
+    main_indices = [i for i in range(len(scores)) if scores[i] is 1]
+    main_scores = [scores[i] for i in main_indices]
+    main_squares = [squares[i] for i in main_indices]
 
     for i, score in enumerate(main_scores):
 
