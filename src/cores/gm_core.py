@@ -13,7 +13,7 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self):
+    def __init__(self, use_camera=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -36,15 +36,13 @@ class GMCore:
         hsv_min_w = np.array([0, 0, 84])
         hsv_max_w = np.array([176, 152, 255])
 
-
         # Red markers
         hsv_min_marker = np.array([0, 177, 240])
         hsv_max_marker = np.array([98, 255, 255])
 
-
-
         load_dotenv(find_dotenv())
-        self.vision_core = VisionCore(hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, hsv_min_marker, hsv_max_marker)
+        self.vision_core = VisionCore(hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, hsv_min_marker, hsv_max_marker,
+                                      use_camera=use_camera)
         self.control_core = ControlCore()
         self.chess_core = ChessCore(engine_side="WHITE")
 
@@ -128,5 +126,5 @@ class GMCore:
 
 
 if __name__ == "__main__":
-    core = GMCore()
+    core = GMCore(use_camera=False)
     core.spin()

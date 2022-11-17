@@ -14,8 +14,10 @@ class VisionCore:
                  hsv_min_w,
                  hsv_max_w,
                  hsv_min_marker,
-                 hsv_max_marker):
+                 hsv_max_marker,
+                 use_camera=False):
         self.images = []
+        self.use_camera = use_camera
 
         self.empty_board_image = None
         self.last_user_move = None
@@ -38,20 +40,25 @@ class VisionCore:
         self.hsv_min_marker = hsv_min_marker
         self.hsv_max_marker = hsv_max_marker
 
-        # empty_image = cv2.imread('src/assets/moves/empty_lichess2.png')
-        # imageA = cv2.imread('src/assets/moves/lichess2_1.png')
-        # imageB = cv2.imread('src/assets/moves/lichess2_2.png')
-        # self.fake_images = [empty_image, imageA, imageB]
+
+
+        # empty_image = cv2.imread('src/assets/moves/real_board/Move_Empty2.jpeg')
+        # initial_image = cv2.imread('src/assets/moves/real_board/Move_Initial.jpeg')
+        # image1 = cv2.imread('src/assets/moves/real_board/Move1.jpeg')
+        # image2 = cv2.imread('src/assets/moves/real_board/Move2.jpeg')
+        # image3 = cv2.imread('src/assets/moves/real_board/Move3.jpeg')
+        # image4 = cv2.imread('src/assets/moves/real_board/Move4.jpeg')
+        # image5 = cv2.imread('src/assets/moves/real_board/Move5.jpeg')
+        #
+        # self.fake_images = [empty_image, initial_image, image1, image2, image3, image4, image5]
+
 
         empty_image = cv2.imread('src/assets/moves/real_board/Move_Empty2.jpeg')
-        initial_image = cv2.imread('src/assets/moves/real_board/Move_Initial.jpeg')
-        image1 = cv2.imread('src/assets/moves/real_board/Move1.jpeg')
-        image2 = cv2.imread('src/assets/moves/real_board/Move2.jpeg')
-        image3 = cv2.imread('src/assets/moves/real_board/Move3.jpeg')
-        image4 = cv2.imread('src/assets/moves/real_board/Move4.jpeg')
-        image5 = cv2.imread('src/assets/moves/real_board/Move5.jpeg')
+        initial_image = cv2.imread('src/assets/moves/real_board/colored/Move_Initial.jpeg')
+        image1 = cv2.imread('src/assets/moves/real_board/colored/Move1.jpeg')
+        image2 = cv2.imread('src/assets/moves/real_board/colored/Move2.jpeg')
 
-        self.fake_images = [empty_image, initial_image, image1, image2, image3, image4, image5]
+        self.fake_images = [empty_image, initial_image, image1, image2]
 
         self.chessboard_map = [['a8', 'a7', 'a6', 'a5', 'a4', 'a3', 'a2', 'a1'],
                                ['b8', 'b7', 'b6', 'b5', 'b4', 'b3', 'b2', 'b1'],
@@ -112,8 +119,10 @@ class VisionCore:
 
     def capture_image(self):
         logger.info("Capturing image")
-        image = None  # TODO: Get from camera
-        image = self.fake_images.pop(0)
+        if not self.use_camera:
+            image = self.fake_images.pop(0)
+        else:
+            image = None  # TODO: Get from camera through ROS
         image = self.preprocess_image(image)
         return image
 
