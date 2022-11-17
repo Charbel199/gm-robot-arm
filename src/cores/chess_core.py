@@ -1,6 +1,6 @@
-from src.chess.chess_engine import ChessEngine
+from chess_handler.chess_engine import ChessEngine
 import os
-from src.logger.log import LoggerService
+from logger.log import LoggerService
 
 logger = LoggerService.get_instance()
 

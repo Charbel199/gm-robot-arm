@@ -4,7 +4,7 @@ import imutils
 import numpy as np
 import math
 from sewar.full_ref import mse, rmse, psnr, uqi, ssim, ergas, scc, rase, sam, msssim, vifp
-from src.logger.log import LoggerService
+from logger.log import LoggerService
 
 logger = LoggerService.get_instance()
 
@@ -74,7 +74,7 @@ def concat_images(images, titles, force_row_size=None, with_titles=True, width=N
 
 # Get HSV filter
 def get_hsv_filter(image, lower, upper):
-    # Extract chess-board lines
+    # Extract chess_handler-board lines
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     msk = cv2.inRange(hsv, lower, upper)
     krn = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 30))
@@ -86,7 +86,7 @@ def get_hsv_filter(image, lower, upper):
 
 # Get canny image based on hsv lower and upper bounds
 def get_hsv_canny(image, lower, upper):
-    # Extract chess-board lines
+    # Extract chess_handler-board lines
     res = get_hsv_filter(image, lower, upper)
     res1 = cv2.Canny(res, 38, 38 * 3)
     return res1
@@ -190,23 +190,25 @@ def corner_points_to_squares(points, size=8, with_text=False, image=None):
 # Get difference between grayscale images
 def get_images_diff_histograms(imgA, imgB):
     hist1A = cv2.calcHist([imgA], [0], None, [256], [0, 256])
-    cv2.normalize(hist1A, hist1A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    # cv2.normalize(hist1A, hist1A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist2A = cv2.calcHist([imgA], [1], None, [256], [0, 256])
-    cv2.normalize(hist2A, hist2A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    # cv2.normalize(hist2A, hist2A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist3A = cv2.calcHist([imgA], [2], None, [256], [0, 256])
-    cv2.normalize(hist3A, hist3A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    # cv2.normalize(hist3A, hist3A, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
 
     hist1B = cv2.calcHist([imgB], [0], None, [256], [0, 256])
-    cv2.normalize(hist1B, hist1B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    # cv2.normalize(hist1B, hist1B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist2B = cv2.calcHist([imgB], [1], None, [256], [0, 256])
-    cv2.normalize(hist2B, hist2B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    # cv2.normalize(hist2B, hist2B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
     hist3B = cv2.calcHist([imgB], [2], None, [256], [0, 256])
-    cv2.normalize(hist3B, hist3B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    # cv2.normalize(hist3B, hist3B, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+
+
 
     score1 = cv2.compareHist(hist1A, hist1B, cv2.HISTCMP_CORREL)
     score2 = cv2.compareHist(hist2A, hist2B, cv2.HISTCMP_CORREL)
     score3 = cv2.compareHist(hist3A, hist3B, cv2.HISTCMP_CORREL)
-    score = (score1 + score2 + score3) / 3
+    score = (score2 + score3)
     return score
 
 

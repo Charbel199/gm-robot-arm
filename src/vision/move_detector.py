@@ -1,7 +1,7 @@
 from skimage.metrics import structural_similarity as compare_ssim
 import cv2
 import imutils
-from src.utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made, get_hsv_filter, sort_array_of_points, get_four_corners
+from utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made, get_hsv_filter, sort_array_of_points, get_four_corners
 import numpy as np
 
 chessboard_map = [['a8', 'a7', 'a6', 'a5', 'a4', 'a3', 'a2', 'a1'],

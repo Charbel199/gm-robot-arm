@@ -5,7 +5,7 @@ def nothing(x):
     pass
 
 # Load image
-image = cv2.imread('src/assets/moves/real_board/Move_Empty2.jpeg')
+image = cv2.imread('src/assets/moves/real_board/colored/Move_Initial.jpeg')
 
 # Create a window
 cv2.namedWindow('image')

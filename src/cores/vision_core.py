@@ -1,7 +1,7 @@
 import cv2
-from src.utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made, \
+from utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_move_made, \
     get_hsv_filter, get_four_corners
-from src.logger.log import LoggerService
+from logger.log import LoggerService
 import numpy as np
 
 logger = LoggerService.get_instance()
