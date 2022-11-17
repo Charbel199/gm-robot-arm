@@ -7,6 +7,8 @@ logger = LoggerService.get_instance()
 
 class ChessEngine:
     def __init__(self, stockfish_path, elo_rating=1300, engine_side="BLACK") -> None:
+        self.engine_side = engine_side
+        self.user_side = "WHITE" if engine_side == "BLACK" else "BLACK"
         self.visualizer = ChessVisualizer(engine_side=engine_side)
         self.stockfish = Stockfish(path=stockfish_path)
         self.stockfish.set_elo_rating(elo_rating)
@@ -38,18 +40,48 @@ class ChessEngine:
         return self.stockfish.will_move_be_a_capture(move)
 
     def deduce_move(self, squares):
+        logger.info(f"Deducing moves from squares: {squares}")
         pieces = []
         for s in squares:
-            pieces.append(self.stockfish.get_what_is_on_square(s))
-         # TODO: Take into account Castling and En Passant
+            piece_color = self.stockfish.get_what_is_on_square(s).name.split('_')[
+                0] if self.stockfish.get_what_is_on_square(s) is not None else None
+            piece_type = self.stockfish.get_what_is_on_square(s).name.split('_')[
+                1] if self.stockfish.get_what_is_on_square(s) is not None else None
+            pieces.append(
+                (s, piece_color, piece_type)
+            )
 
-        for i, p in enumerate(pieces):
-            if p is not None:
-                first_square = squares[i]
-            if p is None:
-                second_square = squares[i]
+        empty_squares = [piece[0] for piece in pieces if piece[1] is None]
+        user_squares = [piece[0] for piece in pieces if piece[1] == self.user_side]
+        engine_squares = [piece[0] for piece in pieces if piece[1] == self.engine_side]
+        # If 2
+        if len(pieces) == 2:
+            # Take
+            if len(empty_squares) == 0:
+                logger.info(f"Move - Taking: {user_squares[0]}{engine_squares[0]}")
+                return f"{user_squares[0]}{engine_squares[0]}"
 
-        return f"{first_square}{second_square}"
+            # Move
+            if len(empty_squares) == 1:
+                logger.info(f"Move - Moving: {user_squares[0]}{empty_squares[0]}")
+                return f"{user_squares[0]}{empty_squares[0]}"
+
+        # If 3
+        if len(pieces) == 3:
+            # En passant
+            logger.info(f"Move - En Passant: {user_squares[0]}{empty_squares[0]}")
+            return f"{user_squares[0]}{empty_squares[0]}"
+
+        # If 4
+        if len(pieces) == 4:
+            king_square = [piece[0] for piece in user_squares if piece[2] == 'KING'][0]
+            rook_square = [piece[0] for piece in user_squares if piece[2] == 'ROOK'][0]
+            logger.info(f"Move - Castling: {king_square}{rook_square}")
+            # Castle
+            return f"{king_square}{rook_square}"
+
+        return
+
 
 if __name__ == "__main__":
     stockfish_path = "/home/charbel199/projs/gm-robot-arm/src/assets/engine/stockfish"
