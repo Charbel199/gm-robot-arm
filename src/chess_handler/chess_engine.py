@@ -37,6 +37,19 @@ class ChessEngine:
     def get_type_of_move(self, move):
         return self.stockfish.will_move_be_a_capture(move)
 
+    def deduce_move(self, squares):
+        pieces = []
+        for s in squares:
+            pieces.append(self.stockfish.get_what_is_on_square(s))
+         # TODO: Take into account Castling and En Passant
+
+        for i, p in enumerate(pieces):
+            if p is not None:
+                first_square = squares[i]
+            if p is None:
+                second_square = squares[i]
+
+        return f"{first_square}{second_square}"
 
 if __name__ == "__main__":
     stockfish_path = "/home/charbel199/projs/gm-robot-arm/src/assets/engine/stockfish"
