@@ -8,12 +8,13 @@ import numpy as np
 import cv2
 from utils.cv_utils import concat_images
 from logger.log import LoggerService
+import time
 
 logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, use_camera=False, is_simulation=False):
+    def __init__(self, use_camera=False, is_simulation=False, with_sound=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -55,8 +56,7 @@ class GMCore:
                                       hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
         self.control_core = ControlCore()
-        self.chess_core = ChessCore(engine_side="BLACK", is_simulation=is_simulation)
-
+        self.chess_core = ChessCore(engine_side="BLACK", is_simulation=is_simulation, with_sound= with_sound, time_increment=5)
         listener = keyboard.Listener(
             on_press=self.on_key_press)
         listener.start()
@@ -111,6 +111,8 @@ class GMCore:
         logger.info("Done performing automatic move")
 
     def on_user_move(self):
+        # TODO: What if robot starts
+        self.chess_core.game_started = True
 
         self.vision_core.update_images()
         user_squares_changed = self.vision_core.get_user_squares_changed()
@@ -118,9 +120,11 @@ class GMCore:
         # TODO: Update move based on positions
         # ...
         self.chess_core.update_board(user_move)
+        self.chess_core.switch_turn()
 
         # Wait x ms
         # self.on_robot_move()
+        # self.chess_core.user_side = True
 
     def on_robot_move(self):
         arm_move = self.chess_core.get_next_best_move()
@@ -131,11 +135,26 @@ class GMCore:
         # WAIT UNTIL MOVE IS COMPLETELY DONE
         self.vision_core.update_images()
         self.chess_core.update_board(arm_move)
+        self.chess_core.switch_turn()
 
     def spin(self):
         logger.info(f'Spinning ...')
+        start = time.time()
+
         while True:
-            images_to_show = [self.chess_core.get_board_image()]
+            end = time.time()
+            time_elapsed = end - start
+            start = time.time()
+            # Clock update
+            if self.chess_core.game_started:
+                if self.chess_core.user_turn:
+                    self.chess_core.user_timer -= time_elapsed
+                else:
+                    self.chess_core.engine_timer -= time_elapsed
+            clock = self.chess_core.get_clock()
+
+            # Images to show
+            images_to_show = [self.chess_core.get_board_image(), clock]
             if self.vision_core.images_to_show is not None:
                 images_to_show.extend(self.vision_core.images_to_show)
 
@@ -145,6 +164,7 @@ class GMCore:
             if cv2.waitKey(33) == ord('q'):
                 logger.info("Terminating ... \n\n\n")
                 break
+            time.sleep(1)
 
 
 if __name__ == "__main__":
