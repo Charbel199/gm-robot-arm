@@ -57,7 +57,7 @@ class GMCore:
                                       hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
         self.chess_core = ChessCore(engine_side="BLACK")
-        self.control_core = rospy.Publisher('/control_core/move', Moves, queue_size=10)
+        self.control_core = rospy.Publisher('/control/move', Moves, queue_size=10)
 
         listener = keyboard.Listener(
             on_press=self.on_key_press)
@@ -134,9 +134,13 @@ class GMCore:
         # # TODO: Call control core to make the next move
         # # ...
         #
-        self.send_move(["YEET", "a5"])
+        rospy.set_param('/control/move_complete_counter', len(move_commands))
+        for move_command in move_commands:
+            self.send_move(move_command)
         # self.chess_core.update_board(arm_move)
         # WAIT UNTIL MOVE IS COMPLETELY DONE
+        while (rospy.get_param('/control/move_complete_counter')!=0):
+            pass
         self.vision_core.update_images()
         self.chess_core.update_board(arm_move)
 
