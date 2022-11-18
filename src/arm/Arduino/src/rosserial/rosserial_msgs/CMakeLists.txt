@@ -9,6 +9,7 @@ add_message_files(FILES
   Log.msg
   TopicInfo.msg
   ServoPositions.msg
+  Moves.msg
 )
 
 add_service_files(FILES

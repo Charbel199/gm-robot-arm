@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 from utils.cv_utils import concat_images
 from logger.log import LoggerService
+from rosserial_msgs.msg import Moves
+import rospy
 
 logger = LoggerService.get_instance()
 
@@ -55,11 +57,13 @@ class GMCore:
                                       hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
         self.chess_core = ChessCore(engine_side="BLACK")
+        self.control_core = rospy.Publisher('/control_core/move', Moves, queue_size=10)
 
         listener = keyboard.Listener(
             on_press=self.on_key_press)
         listener.start()
         logger.info(f'Keyboard listeners started ...')
+        rospy.init_node('GM_core')
 
     def get_instructions(self):
         instructions = "INSTRUCTIONS \n" \
@@ -109,8 +113,8 @@ class GMCore:
         self.chess_core.update_board(self.chess_core.get_next_best_move())
         logger.info("Done performing automatic move")
 
-    def move(self):
-        self.control_core.send_move(1)
+    def send_move(self, move):
+        self.control_core.publish(move[0], move[1])
         
     def on_user_move(self):
 
@@ -130,7 +134,7 @@ class GMCore:
         # # TODO: Call control core to make the next move
         # # ...
         #
-        self.move()
+        self.send_move(["YEET", "a5"])
         # self.chess_core.update_board(arm_move)
         # WAIT UNTIL MOVE IS COMPLETELY DONE
         self.vision_core.update_images()
