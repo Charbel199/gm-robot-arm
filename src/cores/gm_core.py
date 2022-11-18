@@ -193,6 +193,7 @@ class GMCore:
             clock = self.chess_core.get_clock()
 
             # Check images to add
+            self.vision_core.images_to_show = []
             if self._toggle_visualize_last_move:
                 self.vision_core.visualize_last_move()
 

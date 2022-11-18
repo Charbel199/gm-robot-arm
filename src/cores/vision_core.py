@@ -114,8 +114,10 @@ class VisionCore:
         try:
             self.images_to_show = [self.calibrated_image]
             self.images_to_show.extend(self.images.copy())
+            if any(image is None for image in self.images_to_show):
+                self.images_to_show = []
         except Exception:
-            self.images_to_show = None
+            self.images_to_show = []
 
     def visualize_last_move(self):
         try:
@@ -123,8 +125,10 @@ class VisionCore:
             self.images_to_show.append(self.images[-2].copy())
             self.images_to_show.append(self.cached_image_last_move)
             self.images_to_show.append(self.cached_squares_differences_images)
+            if any(image is None for image in self.images_to_show):
+                self.images_to_show = []
         except Exception:
-            self.images_to_show = None
+            self.images_to_show = []
 
     def capture_image(self):
         logger.info("Capturing image")
