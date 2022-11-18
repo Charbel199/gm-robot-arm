@@ -51,11 +51,11 @@ class GMCore:
         self.vision_core = VisionCore(hsv_min_b, hsv_max_b,
                                       hsv_min_w, hsv_max_w,
                                       hsv_min_marker, hsv_max_marker,
-                                      hsv_min_greenwhite,hsv_max_greenwhite,
+                                      hsv_min_greenwhite, hsv_max_greenwhite,
                                       hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
         self.control_core = ControlCore()
-        self.chess_core = ChessCore(engine_side="BLACK")
+        self.chess_core = ChessCore(engine_side="BLACK", is_simulation=is_simulation)
 
         listener = keyboard.Listener(
             on_press=self.on_key_press)
@@ -70,8 +70,8 @@ class GMCore:
                        "v: Visualize all positions\n" \
                        "b: Visualize last move analysis\n" \
                        "space: User move\n" \
+                       "r: Robot move\n" \
                        "m: Perform random move\n" \
-                       "space: User move\n" \
                        "q: Exit\n" \
                        "================\n"
         return instructions
@@ -79,17 +79,21 @@ class GMCore:
     def on_key_press(self, key):
 
         if 'char' in dir(key):
-            logger.info(f'Key {key.char} was pressed')
             if key.char == 'e':
                 self.on_empty_board()
-            if key.char == 'i':
+            elif key.char == 'i':
                 self.on_initial_board()
-            if key.char == 'm':
-                self.random_move()
-            if key.char == 'v':
+            # elif key.char == 'm':
+            #     self.random_move()
+            elif key.char == 'v':
                 self.vision_core.visualize_all_images()
-            if key.char == 'b':
+            elif key.char == 'b':
                 self.vision_core.visualize_last_move()
+            elif key.char == 'r':
+                self.on_robot_move()
+            else:
+                return
+            logger.info(f'Key {key.char} was pressed')
         if key == Key.space:
             logger.info(f"Key 'space' was pressed")
             self.on_user_move()
@@ -114,13 +118,18 @@ class GMCore:
         # ...
         self.chess_core.update_board(user_move)
 
+        # Wait x ms
+        # self.on_robot_move()
+
+    def on_robot_move(self):
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
         # # TODO: Call control core to make the next move
         # # ...
         #
-        # self.chess_core.update_board(arm_move)
-
+        # WAIT UNTIL MOVE IS COMPLETELY DONE
+        self.vision_core.update_images()
+        self.chess_core.update_board(arm_move)
 
     def spin(self):
         logger.info(f'Spinning ...')
