@@ -14,7 +14,7 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, use_camera=False, is_simulation=False, with_sound=False):
+    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -56,7 +56,8 @@ class GMCore:
                                       hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
         self.control_core = ControlCore()
-        self.chess_core = ChessCore(engine_side="BLACK", is_simulation=is_simulation, with_sound= with_sound, time_increment=5)
+        self.chess_core = ChessCore(engine_side=engine_side, is_simulation=is_simulation, with_sound=with_sound,
+                                    time_increment=5)
         listener = keyboard.Listener(
             on_press=self.on_key_press)
         listener.start()
@@ -111,9 +112,6 @@ class GMCore:
         logger.info("Done performing automatic move")
 
     def on_user_move(self):
-        # TODO: What if robot starts
-        self.chess_core.game_started = True
-
         self.vision_core.update_images()
         user_squares_changed = self.vision_core.get_user_squares_changed()
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)

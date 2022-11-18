@@ -34,8 +34,10 @@ class ChessCore:
         logger.info(f'Stockfish engine with {os.environ.get("ELO_RATING")} ELO rating launched ...')
 
         self.fake_moves = ["e7e5", "e5d4"]
+        # self.fake_moves = ["e2e4", "d2d4","d1d4"]
 
     def switch_turn(self):
+        self.game_started = True
         # Increment timer
         # Do not increment if it's the first switch
         if self.initial_switch:
