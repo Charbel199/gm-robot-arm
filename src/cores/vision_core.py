@@ -16,6 +16,7 @@ class VisionCore:
                  hsv_min_greenwhite, hsv_max_greenwhite,
                  hsv_min_blackpurple, hsv_max_blackpurple,
                  use_camera=False):
+        logger.info(f'Launching Vision Core')
         self.images = []
         self.use_camera = use_camera
         self._is_calibrated = False

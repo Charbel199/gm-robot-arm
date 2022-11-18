@@ -18,50 +18,65 @@ class GMCore:
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
+        self.use_camera = use_camera
+        self.engine_side = engine_side
+        self.is_simulation = is_simulation
+        self.with_sound = with_sound
 
         # Lichess White and Blue board
-        # hsv_min_b = np.array([0, 69, 0])
-        # hsv_max_b = np.array([179, 245, 255])
-        # hsv_min_w = np.array([0, 0, 146])
-        # hsv_max_w = np.array([179, 66, 234])
+        # self.hsv_min_b = np.array([0, 69, 0])
+        # self.hsv_max_b = np.array([179, 245, 255])
+        # self.hsv_min_w = np.array([0, 0, 146])
+        # self.hsv_max_w = np.array([179, 66, 234])
 
         # Lounge brown and white board
-        # hsv_min_b = np.array([0, 0, 122])
-        # hsv_max_b = np.array([74, 87, 255])
-        # hsv_min_w = np.array([7, 0, 0])
-        # hsv_max_w = np.array([93, 255, 124])
+        # self.hsv_min_b = np.array([0, 0, 122])
+        # self.hsv_max_b = np.array([74, 87, 255])
+        # self.hsv_min_w = np.array([7, 0, 0])
+        # self.hsv_max_w = np.array([93, 255, 124])
 
         # Lounge black and white board
-        hsv_min_b = np.array([0, 0, 0])
-        hsv_max_b = np.array([27, 241, 90])
-        hsv_min_w = np.array([0, 0, 84])
-        hsv_max_w = np.array([176, 152, 255])
+        self.hsv_min_b = np.array([0, 0, 0])
+        self.hsv_max_b = np.array([27, 241, 90])
+        self.hsv_min_w = np.array([0, 0, 84])
+        self.hsv_max_w = np.array([176, 152, 255])
 
         # Red markers
-        hsv_min_marker = np.array([0, 177, 240])
-        hsv_max_marker = np.array([98, 255, 255])
+        self.hsv_min_marker = np.array([0, 177, 240])
+        self.hsv_max_marker = np.array([98, 255, 255])
 
         # White/Green chess pieces
-        hsv_min_greenwhite = np.array([56, 121, 184])
-        hsv_max_greenwhite = np.array([65, 255, 255])
+        self.hsv_min_greenwhite = np.array([56, 121, 184])
+        self.hsv_max_greenwhite = np.array([65, 255, 255])
         # Black/Purple chess pieces
-        hsv_min_blackpurple = np.array([116, 164, 183])
-        hsv_max_blackpurple = np.array([154, 255, 255])
+        self.hsv_min_blackpurple = np.array([116, 164, 183])
+        self.hsv_max_blackpurple = np.array([154, 255, 255])
 
         load_dotenv(find_dotenv())
-        self.vision_core = VisionCore(hsv_min_b, hsv_max_b,
-                                      hsv_min_w, hsv_max_w,
-                                      hsv_min_marker, hsv_max_marker,
-                                      hsv_min_greenwhite, hsv_max_greenwhite,
-                                      hsv_min_blackpurple, hsv_max_blackpurple,
-                                      use_camera=use_camera)
-        self.control_core = ControlCore()
-        self.chess_core = ChessCore(engine_side=engine_side, is_simulation=is_simulation, with_sound=with_sound,
-                                    time_increment=5)
+
+        self.chess_core = None
+        self.vision_core = None
+        self.control_core = None
+        self.initialize_cores()
+
         listener = keyboard.Listener(
             on_press=self.on_key_press)
         listener.start()
         logger.info(f'Keyboard listeners started ...')
+
+    def initialize_cores(self):
+        logger.info(f'Initializing cores')
+        self.vision_core = VisionCore(self.hsv_min_b, self.hsv_max_b,
+                                      self.hsv_min_w, self.hsv_max_w,
+                                      self.hsv_min_marker, self.hsv_max_marker,
+                                      self.hsv_min_greenwhite, self.hsv_max_greenwhite,
+                                      self.hsv_min_blackpurple, self.hsv_max_blackpurple,
+                                      use_camera=self.use_camera)
+        self.control_core = ControlCore()
+        self.chess_core = ChessCore(engine_side=self.engine_side, is_simulation=self.is_simulation,
+                                    with_sound=self.with_sound,
+                                    time_increment=5)
+        logger.info(f'All cores have been initialized')
 
     def get_instructions(self):
         instructions = "INSTRUCTIONS \n" \
@@ -80,7 +95,7 @@ class GMCore:
     def on_key_press(self, key):
 
         if 'char' in dir(key):
-            logger.info(f'Key {key.char} was pressed')
+            logger.debug(f'Key {key.char} was pressed')
             if key.char == 'e':
                 self.on_empty_board()
             elif key.char == 'i':
@@ -97,8 +112,12 @@ class GMCore:
                 return
 
         if key == Key.space:
-            logger.info(f"Key 'space' was pressed")
+            logger.debug(f"Key 'space' was pressed")
             self.on_user_move()
+        if key == Key.esc:
+            logger.debug(f"Key 'esc' was pressed")
+            logger.info(f"Resetting GM Core")
+            self.initialize_cores()
 
     def on_empty_board(self):
         self.vision_core.calibrate()
