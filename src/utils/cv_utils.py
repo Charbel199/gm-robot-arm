@@ -33,7 +33,7 @@ def concat_images(images, titles, force_row_size=None, with_titles=True, width=N
     font = cv2.FONT_HERSHEY_SIMPLEX
     position = (15, 35)
     fontColor = (0, 255, 0)
-    thickness = 2
+    thickness = 1
     lineType = 1
     for i, image in enumerate(images):
         # Make all images 3 channels

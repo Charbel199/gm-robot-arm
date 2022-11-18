@@ -76,6 +76,8 @@ class GMCore:
         self.chess_core = ChessCore(engine_side=self.engine_side, is_simulation=self.is_simulation,
                                     with_sound=self.with_sound,
                                     time_increment=5)
+        self._toggle_visualize_last_move = False
+        self._toggle_visualize_all_images = False
         logger.info(f'All cores have been initialized')
 
     def get_instructions(self):
@@ -103,9 +105,14 @@ class GMCore:
             # elif key.char == 'm':
             #     self.random_move()
             elif key.char == 'v':
+                if self._toggle_visualize_last_move:
+                    self._toggle_visualize_last_move = False
+                self._toggle_visualize_all_images = not self._toggle_visualize_all_images
                 self.vision_core.visualize_all_images()
             elif key.char == 'b':
-                self.vision_core.visualize_last_move()
+                if self._toggle_visualize_all_images:
+                    self._toggle_visualize_all_images = False
+                self._toggle_visualize_last_move = not self._toggle_visualize_last_move
             elif key.char == 'r':
                 self.on_robot_move()
             else:
@@ -184,6 +191,13 @@ class GMCore:
                 else:
                     self.chess_core.engine_timer -= time_elapsed
             clock = self.chess_core.get_clock()
+
+            # Check images to add
+            if self._toggle_visualize_last_move:
+                self.vision_core.visualize_last_move()
+
+            if self._toggle_visualize_all_images:
+                self.vision_core.visualize_all_images()
 
             # Images to show
             images_to_show = [self.chess_core.get_board_image(), clock]
