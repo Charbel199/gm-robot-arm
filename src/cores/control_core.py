@@ -26,19 +26,19 @@ class ControlCore:
     def move_sequence(self, control_move, move_type):
         for i in range(6):
             if i==0:
-                self.pub.publish(180 if control_move[0]==0 else 0, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], control_move[5])
+                self.pub.publish(180 if control_move[0]==90 else 90, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], control_move[5])
                 self.wait_for_move()
             if i==1:
-                self.pub.publish(180 if control_move[0]==0 else 0, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], control_move[4], control_move[5])
+                self.pub.publish(180 if control_move[0]==90 else 90, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], control_move[4], control_move[5])
                 self.wait_for_move()
             if i==2:
-                self.pub.publish(180 if control_move[0]==0 else 0, SAFE_POSE[0], SAFE_POSE[1], control_move[3], control_move[4], control_move[5])
+                self.pub.publish(180 if control_move[0]==90 else 90, SAFE_POSE[0], SAFE_POSE[1], control_move[3], control_move[4], control_move[5])
                 self.wait_for_move()
             if i==3:
-                self.pub.publish(180 if control_move[0]==0 else 0, SAFE_POSE[0], control_move[2], control_move[3], control_move[4], control_move[5])
+                self.pub.publish(180 if control_move[0]==90 else 90, SAFE_POSE[0], control_move[2], control_move[3], control_move[4], control_move[5])
                 self.wait_for_move()
             if i==4:
-                self.pub.publish(180 if control_move[0]==0 else 0, control_move[1], control_move[2], control_move[3], control_move[4], control_move[5])
+                self.pub.publish(180 if control_move[0]==90 else 90, control_move[1], control_move[2], control_move[3], control_move[4], control_move[5])
                 self.wait_for_move()
             if i==5:
                 self.pub.publish(control_move[0], control_move[1], control_move[2], control_move[3], control_move[4], control_move[5])
@@ -77,7 +77,7 @@ class ControlCore:
         if move_type == 'PICK':
             control_move.insert(0,180)
         else:
-            control_move.insert(0,0)
+            control_move.insert(0,90)
         
         print(control_move)
         self.move_sequence(control_move, move_type)           
