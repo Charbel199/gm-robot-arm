@@ -6,7 +6,7 @@ logger = LoggerService.get_instance()
 
 
 class ChessCore:
-    def __init__(self, engine_side):
+    def __init__(self, engine_side, is_simulation=True):
         logger.info(f'Launching Chess Core')
         self.engine_side = engine_side
         self.user_side = "WHITE" if engine_side == "BLACK" else "BLACK"
@@ -15,9 +15,12 @@ class ChessCore:
 
         self.engine = ChessEngine(os.environ.get("STOCKFISH_PATH"), elo_rating=os.environ.get("ELO_RATING"),
                                   engine_side=self.engine_side)
+        self.is_simulation = is_simulation
         self.engine.check_stockfish_health()
         self.current_board = self.get_board()
         logger.info(f'Stockfish engine with {os.environ.get("ELO_RATING")} ELO rating launched ...')
+
+        self.fake_moves = ["e7e5", "e5d4"]
 
     def get_board(self):
         return self.engine.get_board(white_side=self.engine_is_white)
@@ -37,6 +40,10 @@ class ChessCore:
         self.current_board = self.get_board()
 
     def get_next_best_move(self) -> str:
-        next_best_move = self.engine.get_next_best_move()
+        if not self.is_simulation:
+            next_best_move = self.engine.get_next_best_move()
+        else:
+            next_best_move = self.fake_moves.pop(0)
+
         logger.info(f"Next best move is {next_best_move}")
         return next_best_move
