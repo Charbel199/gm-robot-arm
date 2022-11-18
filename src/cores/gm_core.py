@@ -13,7 +13,7 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, use_camera=False):
+    def __init__(self, use_camera=False, is_simulation=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -111,8 +111,8 @@ class GMCore:
         # ...
         self.chess_core.update_board(user_move)
 
-        # arm_move = self.chess_core.get_next_best_move()
-        #
+        arm_move = self.chess_core.get_next_best_move()
+        move_commands = self.chess_core.get_move_commands(arm_move)
         # # TODO: Call control core to make the next move
         # # ...
         #
