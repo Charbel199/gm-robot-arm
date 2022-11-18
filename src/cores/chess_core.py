@@ -1,13 +1,25 @@
 from chess_handler.chess_engine import ChessEngine
 import os
 from logger.log import LoggerService
+import cv2
+import numpy as np
+from utils.buzz import play_sound
 
 logger = LoggerService.get_instance()
 
 
 class ChessCore:
-    def __init__(self, engine_side, is_simulation=True):
+    def __init__(self, engine_side, initial_time=360, time_increment=0, is_simulation=True, with_sound=False):
         logger.info(f'Launching Chess Core')
+
+        self.user_timer = initial_time
+        self.engine_timer = initial_time
+        self.time_increment = time_increment
+        self.game_started = False
+        self.initial_switch = False
+
+        self.user_turn = engine_side == "BLACK"
+        self.with_sound = with_sound
         self.engine_side = engine_side
         self.user_side = "WHITE" if engine_side == "BLACK" else "BLACK"
         self.engine_is_white = self.engine_side == "WHITE"
@@ -21,6 +33,52 @@ class ChessCore:
         logger.info(f'Stockfish engine with {os.environ.get("ELO_RATING")} ELO rating launched ...')
 
         self.fake_moves = ["e7e5", "e5d4"]
+
+    def switch_turn(self):
+        # Increment timer
+        # Do not increment if it's the first switch
+        if self.initial_switch:
+            if self.user_turn:
+                self.user_timer += self.time_increment
+            else:
+                self.engine_timer += self.time_increment
+        else:
+            self.initial_switch = True
+
+        # Switch sides
+        self.user_turn = not self.user_turn
+
+        # Play sound
+        if self.with_sound:
+            play_sound()
+
+    def get_clock(self):
+        mins1, secs1 = divmod(self.user_timer, 60)
+        timer1 = f"{int(mins1)}:{'' if secs1 > 10 else '0'}{round(secs1)}"
+        mins2, secs2 = divmod(self.engine_timer, 60)
+        timer2 = f"{int(mins2)}:{'' if secs2 > 10 else '0'}{round(secs2)}"
+        # logger.debug(f"User time : {timer1} - Engine time: {timer2}")
+
+        clock = 255 * np.ones(shape=[512, 512, 3], dtype=np.uint8)
+        if self.game_started:
+            if self.user_turn:
+                clock[:, :256] = (255, 255, 0)
+            else:
+                clock[:, 256:] = (255, 255, 0)
+        cv2.putText(clock, text=timer1, org=(128, 256),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0, 0, 0),
+                    thickness=2, lineType=cv2.LINE_AA)
+        cv2.putText(clock, text='User timer', org=(80, 370),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=(0, 0, 0),
+                    thickness=1, lineType=cv2.LINE_AA)
+
+        cv2.putText(clock, text=timer2, org=(300, 256),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0, 0, 0),
+                    thickness=2, lineType=cv2.LINE_AA)
+        cv2.putText(clock, text='Engine timer', org=(300, 370),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=(0, 0, 0),
+                    thickness=1, lineType=cv2.LINE_AA)
+        return clock
 
     def get_board(self):
         return self.engine.get_board(white_side=self.engine_is_white)

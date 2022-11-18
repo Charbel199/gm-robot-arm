@@ -65,7 +65,7 @@ class VisionCore:
         image5 = cv2.imread('assets/moves/real_board/colored/Move5.jpeg')
         image6 = cv2.imread('assets/moves/real_board/colored/Move_BeforeCastle.jpeg')
         image7 = cv2.imread('assets/moves/real_board/colored/Move_AfterCastle.jpeg')
-        image8 = cv2.imread('assets/moves/real_board/colored/Move_AfterCastleEnPassant.jpeg')
+        image8 = cv2.imread('assets/moves/real_board/colored/Move_AfterCastle_EnPassant.jpeg')
 
         self.fake_images = [empty_image, initial_image, image1, image2, image3, image4, image5, image6, image7, image8]
 
