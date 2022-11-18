@@ -114,7 +114,6 @@ class VisionCore:
         try:
             self.images_to_show = [self.calibrated_image]
             self.images_to_show.extend(self.images.copy())
-            logger.info("Set all images to visualize")
         except Exception:
             self.images_to_show = None
 
@@ -124,7 +123,6 @@ class VisionCore:
             self.images_to_show.append(self.images[-2].copy())
             self.images_to_show.append(self.cached_image_last_move)
             self.images_to_show.append(self.cached_squares_differences_images)
-            logger.info("Set last move images to visualize")
         except Exception:
             self.images_to_show = None
 
