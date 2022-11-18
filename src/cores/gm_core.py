@@ -164,7 +164,7 @@ class GMCore:
             if cv2.waitKey(33) == ord('q'):
                 logger.info("Terminating ... \n\n\n")
                 break
-            time.sleep(1)
+            time.sleep(0.1)
 
 
 if __name__ == "__main__":

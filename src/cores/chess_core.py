@@ -4,6 +4,7 @@ from logger.log import LoggerService
 import cv2
 import numpy as np
 from utils.buzz import play_sound
+import math
 
 logger = LoggerService.get_instance()
 
@@ -54,9 +55,9 @@ class ChessCore:
 
     def get_clock(self):
         mins1, secs1 = divmod(self.user_timer, 60)
-        timer1 = f"{int(mins1)}:{'' if secs1 > 10 else '0'}{round(secs1)}"
+        timer1 = f"{int(mins1)}:{'' if secs1 > 10 else '0'}{math.floor(secs1)}"
         mins2, secs2 = divmod(self.engine_timer, 60)
-        timer2 = f"{int(mins2)}:{'' if secs2 > 10 else '0'}{round(secs2)}"
+        timer2 = f"{int(mins2)}:{'' if secs2 > 10 else '0'}{math.floor(secs2)}"
         # logger.debug(f"User time : {timer1} - Engine time: {timer2}")
 
         clock = 255 * np.ones(shape=[512, 512, 3], dtype=np.uint8)
