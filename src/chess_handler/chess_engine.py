@@ -53,7 +53,7 @@ class ChessEngine:
         # Normal capture
         if self.stockfish.will_move_be_a_capture(move) == self.stockfish.Capture.DIRECT_CAPTURE:
             commands.append(["PICK", second_square])
-            commands.append(["YEET"])
+            commands.append(["YEET", ""])
             commands.append(["PICK", first_square])
             commands.append(["PLACE", second_square])
         # En passant
@@ -61,7 +61,7 @@ class ChessEngine:
 
             piece_to_remove_square = f"{first_square_row}{second_square_column}"
             commands.append(["PICK", piece_to_remove_square])
-            commands.append(["YEET"])
+            commands.append(["YEET", ""])
             commands.append(["PICK", first_square])
             commands.append(["PLACE", second_square])
 
