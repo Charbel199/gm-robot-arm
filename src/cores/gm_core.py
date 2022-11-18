@@ -54,8 +54,7 @@ class GMCore:
                                       hsv_min_greenwhite, hsv_max_greenwhite,
                                       hsv_min_blackpurple, hsv_max_blackpurple,
                                       use_camera=use_camera)
-        self.control_core = ControlCore()
-        self.chess_core = ChessCore(engine_side="BLACK", is_simulation=is_simulation)
+        self.chess_core = ChessCore(engine_side="BLACK")
 
         listener = keyboard.Listener(
             on_press=self.on_key_press)
@@ -110,6 +109,9 @@ class GMCore:
         self.chess_core.update_board(self.chess_core.get_next_best_move())
         logger.info("Done performing automatic move")
 
+    def move(self):
+        self.control_core.send_move(1)
+        
     def on_user_move(self):
 
         self.vision_core.update_images()
@@ -128,6 +130,8 @@ class GMCore:
         # # TODO: Call control core to make the next move
         # # ...
         #
+        self.move()
+        # self.chess_core.update_board(arm_move)
         # WAIT UNTIL MOVE IS COMPLETELY DONE
         self.vision_core.update_images()
         self.chess_core.update_board(arm_move)

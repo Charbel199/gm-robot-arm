@@ -171,4 +171,3 @@ AzureKinect/Azure-Kinect-Sensor-SDK-develop
 # Arduino Catkin workspace
 src/arm/Arduino/devel/
 src/arm/Arduino/install/
-src/arm/Arduino/src/rosserial
