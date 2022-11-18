@@ -67,6 +67,9 @@ class GMCore:
                        "================\n" \
                        "e: Calibrate on empty board\n" \
                        "i: Capture on initial board layout\n" \
+                       "v: Visualize all positions\n" \
+                       "b: Visualize last move analysis\n" \
+                       "space: User move\n" \
                        "m: Perform random move\n" \
                        "space: User move\n" \
                        "q: Exit\n" \
