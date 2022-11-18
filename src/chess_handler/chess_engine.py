@@ -75,10 +75,11 @@ class ChessEngine:
         # If 4
         if len(pieces) == 4:
             king_square = [piece[0] for piece in user_squares if piece[2] == 'KING'][0]
-            rook_square = [piece[0] for piece in user_squares if piece[2] == 'ROOK'][0]
-            logger.info(f"Move - Castling: {king_square}{rook_square}")
+            empty_castle_square = [piece[0] for piece in empty_squares if "c" or "g" in piece[0]][0]
+
+            logger.info(f"Move - Castling: {king_square}{empty_castle_square}")
             # Castle
-            return f"{king_square}{rook_square}"
+            return f"{king_square}{empty_castle_square}"
 
         return
 
