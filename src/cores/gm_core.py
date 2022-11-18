@@ -54,9 +54,9 @@ class GMCore:
 
         load_dotenv(find_dotenv())
 
-        self.chess_core = None
-        self.vision_core = None
-        self.control_core = None
+        self.chess_core: ChessCore = None
+        self.vision_core: VisionCore = None
+        self.control_core: ControlCore = None
         self.initialize_cores()
 
         listener = keyboard.Listener(
@@ -123,6 +123,9 @@ class GMCore:
         self.vision_core.calibrate()
 
     def on_initial_board(self):
+        if not self.vision_core._is_calibrated:
+            logger.info(f"Calibration is required first")
+            return
         self.vision_core.capture_initial_chessboard_layout()
 
     def random_move(self):
@@ -131,6 +134,12 @@ class GMCore:
         logger.info("Done performing automatic move")
 
     def on_user_move(self):
+        if not self.vision_core._is_calibrated and not self.vision_core._captured_initial_board_layout:
+            logger.info(f"Calibration and initial board layout capture are required first")
+            return
+        if not self.chess_core.user_turn:
+            logger.warn(f"WARNING: Engine turn")
+            return
         self.vision_core.update_images()
         user_squares_changed = self.vision_core.get_user_squares_changed()
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
@@ -144,6 +153,12 @@ class GMCore:
         # self.chess_core.user_side = True
 
     def on_robot_move(self):
+        if not self.vision_core._is_calibrated and not self.vision_core._captured_initial_board_layout:
+            logger.info(f"Calibration and initial board layout capture are required first")
+            return
+        if self.chess_core.user_turn:
+            logger.warn(f"WARNING: User turn")
+            return
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
         # # TODO: Call control core to make the next move
