@@ -16,6 +16,9 @@ Servo servo4;   //Range: 90 to 180
 Servo servo5;   //Range: 90 to 180
 Servo servo6;   //Range: 90 to 180
 
+#define EPSILON 3
+#define DELAY 100
+
 //SafePoseValues:
 #define servo1_safe 90
 #define servo2_safe 90
@@ -28,8 +31,38 @@ Servo servo6;   //Range: 90 to 180
 ros::NodeHandle node;
 
 void message(const rosserial_msgs::ServoPositions& servo_positions){
-  int servo1_pos = servo_positions.servo1;
-  //node.loginfo("servo1" + servo1_pos);
+  int servo1_des_pos = servo_positions.servo1;
+  int servo2_des_pos = servo_positions.servo2;
+  int servo3_des_pos = servo_positions.servo3;
+  int servo4_des_pos = servo_positions.servo4;
+  int servo5_des_pos = servo_positions.servo5;
+  int servo6_des_pos = servo_positions.servo6;
+  float servo1_pos = servo1.read();
+  float servo2_pos = servo2.read();
+  float servo3_pos = servo3.read();
+  float servo4_pos = servo4.read();
+  float servo5_pos = servo5.read();
+  float servo6_pos = servo6.read();
+
+  if(abs(servo1_des_pos - servo1_pos) > EPSILON){
+    moveServo(servo1, servo1_pos, servo1_des_pos, DELAY)
+    }
+  if(abs(servo2_des_pos - servo2_pos) > EPSILON){
+    moveServo(servo2, servo2_pos, servo2_des_pos, DELAY)
+    }
+  if(abs(servo3_des_pos - servo3_pos) > EPSILON){
+    moveServo(servo3, servo3_pos, servo3_des_pos, DELAY)
+    }
+  if(abs(servo4_des_pos - servo4_pos) > EPSILON){
+    moveServo(servo4, servo4_pos, servo4_des_pos, DELAY)
+    }
+  if(abs(servo5_des_pos - servo5_pos) > EPSILON){
+    moveServo(servo5, servo5_pos, servo5_des_pos, DELAY)
+    }
+  if(abs(servo6_des_pos - servo6_pos) > EPSILON){
+    moveServo(servo6, servo6_pos, servo6_des_pos, DELAY)
+    }
+    
   }
 ros::Subscriber<rosserial_msgs::ServoPositions> controller("/control/arm", &message);
  
@@ -43,6 +76,7 @@ void setup() {
   servo6.attach(servoPin6);
   node.initNode();
   node.subscribe(controller);
+  goToInitialPose();
 } 
  
  
@@ -50,20 +84,6 @@ void loop() {
   while(!node.connected()){
     node.spinOnce();
     }
-  node.loginfo("hello");
-  /*
-  //Setting the safe pose
-  goToSafePose();
-
-  //Go to the initial movement pose
-  goToInitialPose();
-  */
-  delay(500);
-}
-
-//Safe pose of the robot that is out of view of the camera
-void goToSafePose(){
-  //TODO: 
 }
 
 //Initial pose to begin the movement
@@ -78,8 +98,17 @@ void goToInitialPose(){
 }
 
 void moveServo(Servo servoX, int from, int to, int delayValue){
-  for( int i=from; i>to; i--){
+  if(from > to){
+  for(int i=from; i>to; i--){
     servoX.write(i);
     delay(delayValue);
+  }
+  }
+
+  if(from < to){
+  for(int i=from; i<to; i++){
+    servoX.write(i);
+    delay(delayValue);
+  }
   }
 }
