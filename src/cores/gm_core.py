@@ -79,6 +79,7 @@ class GMCore:
     def on_key_press(self, key):
 
         if 'char' in dir(key):
+            logger.info(f'Key {key.char} was pressed')
             if key.char == 'e':
                 self.on_empty_board()
             elif key.char == 'i':
@@ -93,7 +94,7 @@ class GMCore:
                 self.on_robot_move()
             else:
                 return
-            logger.info(f'Key {key.char} was pressed')
+
         if key == Key.space:
             logger.info(f"Key 'space' was pressed")
             self.on_user_move()
