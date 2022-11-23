@@ -10,6 +10,8 @@ from utils.cv_utils import concat_images
 from logger.log import LoggerService
 from rosserial_msgs.msg import Moves
 import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
 import time
 
 logger = LoggerService.get_instance()
@@ -45,7 +47,8 @@ class GMCore:
 
         # Real board
         self.hsv_min_b = np.array([0, 0, 0])
-        self.hsv_max_b = np.array([137 , 175, 174])
+        self.hsv_max_b = np.array([168 , 177, 159])
+
         self.hsv_min_w = np.array([0, 0, 84])
         self.hsv_max_w = np.array([176, 152, 255])
 
@@ -71,11 +74,21 @@ class GMCore:
         self.control_core = rospy.Publisher('/control/move', Moves, queue_size=10)
         self.initialize_cores()
 
+        self.bridge = CvBridge()
+        self.camera = rospy.Subscriber("/rgb/image_raw", Image, self._camera_callback)
+
         listener = keyboard.Listener(
             on_press=self.on_key_press)
         listener.start()
         logger.info(f'Keyboard listeners started ...')
         rospy.init_node('GM_core')
+
+    def _camera_callback(self, data):
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            self.vision_core.temp_camera_image = cv_image
+        except CvBridgeError as e:
+            logger.debug(f"Error in CV bridge {e}")
 
     def initialize_cores(self):
         logger.info(f'Initializing cores')
@@ -223,6 +236,10 @@ class GMCore:
 
             # Images to show
             images_to_show = [self.chess_core.get_board_image(), clock]
+            if self.vision_core.temp_camera_image is not None:
+                images_to_show.append(self.vision_core.temp_camera_image)
+            if self.vision_core.debug_images is not None:
+                images_to_show.extend(self.vision_core.debug_images)
             if self.vision_core.images_to_show is not None:
                 images_to_show.extend(self.vision_core.images_to_show)
 
