@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 from utils.cv_utils import concat_images
 from logger.log import LoggerService
+from rosserial_msgs.msg import Moves
+import rospy
 import time
 
 logger = LoggerService.get_instance()
@@ -31,7 +33,7 @@ class GMCore:
 
         # Lounge brown and white board
         # self.hsv_min_b = np.array([0, 0, 122])
-        # self.hsv_max_b = np.array([74, 87, 255])
+        # self.hsv_max_b = np.array([74, 87, 255])timeout
         # self.hsv_min_w = np.array([7, 0, 0])
         # self.hsv_max_w = np.array([93, 255, 124])
 
@@ -66,13 +68,14 @@ class GMCore:
 
         self.chess_core: ChessCore = None
         self.vision_core: VisionCore = None
-        self.control_core: ControlCore = None
+        self.control_core = rospy.Publisher('/control/move', Moves, queue_size=10)
         self.initialize_cores()
 
         listener = keyboard.Listener(
             on_press=self.on_key_press)
         listener.start()
         logger.info(f'Keyboard listeners started ...')
+        rospy.init_node('GM_core')
 
     def initialize_cores(self):
         logger.info(f'Initializing cores')
@@ -82,7 +85,6 @@ class GMCore:
                                       self.hsv_min_greenwhite, self.hsv_max_greenwhite,
                                       self.hsv_min_blackpurple, self.hsv_max_blackpurple,
                                       use_camera=self.use_camera)
-        self.control_core = ControlCore()
         self.chess_core = ChessCore(engine_side=self.engine_side, is_simulation=self.is_simulation,
                                     with_sound=self.with_sound,
                                     time_increment=5)
@@ -150,6 +152,9 @@ class GMCore:
         self.chess_core.update_board(self.chess_core.get_next_best_move())
         logger.info("Done performing automatic move")
 
+    def send_move(self, move):
+        self.control_core.publish(move[0], move[1])
+
     def on_user_move(self):
         if not self.vision_core._is_calibrated and not self.vision_core._captured_initial_board_layout:
             logger.info(f"Calibration and initial board layout capture are required first")
@@ -178,10 +183,16 @@ class GMCore:
             return
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
-        # # TODO: Call control core to make the next move
-        # # ...
-        #
+
+        # Send move to arm
+        rospy.set_param('/control/move_complete_counter', len(move_commands))
+        for move_command in move_commands:
+            self.send_move(move_command)
+        # self.chess_core.update_board(arm_move)
         # WAIT UNTIL MOVE IS COMPLETELY DONE
+        while (rospy.get_param('/control/move_complete_counter')!=0):
+            pass
+        time.sleep(1)
         self.vision_core.update_images()
         self.chess_core.update_board(arm_move)
         self.chess_core.switch_turn()
