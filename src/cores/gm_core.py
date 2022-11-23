@@ -36,14 +36,24 @@ class GMCore:
         # self.hsv_max_w = np.array([93, 255, 124])
 
         # Lounge black and white board
+        # self.hsv_min_b = np.array([0, 0, 0])
+        # self.hsv_max_b = np.array([27, 241, 90])
+        # self.hsv_min_w = np.array([0, 0, 84])
+        # self.hsv_max_w = np.array([176, 152, 255])
+
+        # Real board
         self.hsv_min_b = np.array([0, 0, 0])
-        self.hsv_max_b = np.array([27, 241, 90])
+        self.hsv_max_b = np.array([137 , 175, 174])
         self.hsv_min_w = np.array([0, 0, 84])
         self.hsv_max_w = np.array([176, 152, 255])
 
         # Red markers
-        self.hsv_min_marker = np.array([0, 177, 240])
-        self.hsv_max_marker = np.array([98, 255, 255])
+        ## FAKE BOARD
+        # self.hsv_min_marker = np.array([0, 177, 240])
+        # self.hsv_max_marker = np.array([98, 255, 255])
+        ## REAL BOARD
+        self.hsv_min_marker = np.array([0, 134, 151])
+        self.hsv_max_marker = np.array([179, 255, 255])
 
         # White/Green chess pieces
         self.hsv_min_greenwhite = np.array([56, 121, 184])
