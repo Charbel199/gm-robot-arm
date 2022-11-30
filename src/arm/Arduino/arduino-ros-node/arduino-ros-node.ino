@@ -17,7 +17,7 @@ Servo servo4;   //Range: 90 to 180
 Servo servo5;   //Range: 90 to 180
 Servo servo6;   //Range: 90 to 180
 
-#define EPSILON 3
+#define EPSILON 10
 #define DELAY 100
 
 //SafePoseValues:
@@ -33,15 +33,19 @@ ros::NodeHandle nh;
 std_msgs::Bool bool_msg;
 
 ros::Publisher pub("control/move_done", &bool_msg);
+
 void message(const rosserial_msgs::ServoPositions& servo_positions){
   nh.loginfo("RECEIVED MOVE");
+
+  //Desired positions
   int servo1_des_pos = servo_positions.servo1;
   int servo2_des_pos = servo_positions.servo2;
   int servo3_des_pos = servo_positions.servo3;
   int servo4_des_pos = servo_positions.servo4;
   int servo5_des_pos = servo_positions.servo5;
   int servo6_des_pos = servo_positions.servo6;
- 
+
+  // Current positions
   float servo1_pos = servo1.read();
   float servo2_pos = servo2.read();
   float servo3_pos = servo3.read();
@@ -49,6 +53,12 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   float servo5_pos = servo5.read();
   float servo6_pos = servo6.read();
 
+  //flash LED
+  digitalWrite(13, HIGH);   
+  delay(250);              
+  digitalWrite(13, LOW);    
+  delay(250); 
+  
   if(abs(servo1_des_pos - servo1_pos) > EPSILON){
     moveServo(servo1, servo1_pos, servo1_des_pos, DELAY);
     }
@@ -67,13 +77,16 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   if(abs(servo6_des_pos - servo6_pos) > EPSILON){
     moveServo(servo6, servo6_pos, servo6_des_pos, DELAY);
     }
+    
    
   pub.publish(&bool_msg);
+  nh.loginfo("COMPLETED MOVE");
   }
 
  ros::Subscriber<rosserial_msgs::ServoPositions> controller("control/arm", &message);
  
 void setup() { 
+  pinMode(13, OUTPUT);
   servo1.attach(servoPin1);
   servo2.attach(servoPin2);
   servo3.attach(servoPin3);

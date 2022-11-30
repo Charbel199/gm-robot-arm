@@ -23,7 +23,7 @@ class ControlCore:
         self.done = False
         pass
 
-    def move_sequence(self, control_move, move_type):
+    def move_sequence(self, control_move):
         for i in range(6):
             if i==0:
                 self.pub.publish(180 if control_move[0]==90 else 90, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], control_move[5])
@@ -80,7 +80,7 @@ class ControlCore:
             control_move.insert(0,90)
         
         print(control_move)
-        self.move_sequence(control_move, move_type)           
+        self.move_sequence(control_move)           
         print(f"Executed move.")
         pass
 
