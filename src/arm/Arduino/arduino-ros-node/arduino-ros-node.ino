@@ -29,16 +29,19 @@ Servo servo6;   //Range: 90 to 180
 #define servo6_safe 180
 
 
-ros::NodeHandle node;
+ros::NodeHandle nh;
 std_msgs::Bool bool_msg;
 
+ros::Publisher pub("control/move_done", &bool_msg);
 void message(const rosserial_msgs::ServoPositions& servo_positions){
+  nh.loginfo("RECEIVED MOVE");
   int servo1_des_pos = servo_positions.servo1;
   int servo2_des_pos = servo_positions.servo2;
   int servo3_des_pos = servo_positions.servo3;
   int servo4_des_pos = servo_positions.servo4;
   int servo5_des_pos = servo_positions.servo5;
   int servo6_des_pos = servo_positions.servo6;
+ 
   float servo1_pos = servo1.read();
   float servo2_pos = servo2.read();
   float servo3_pos = servo3.read();
@@ -64,42 +67,36 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   if(abs(servo6_des_pos - servo6_pos) > EPSILON){
     moveServo(servo6, servo6_pos, servo6_des_pos, DELAY);
     }
-    
+   
+  pub.publish(&bool_msg);
   }
-ros::Subscriber<rosserial_msgs::ServoPositions> controller("/control/arm", &message);
-ros::Publisher pub("/control/move_done", &bool_msg);
+
+ ros::Subscriber<rosserial_msgs::ServoPositions> controller("control/arm", &message);
  
 void setup() { 
-  Serial.begin(9600);
   servo1.attach(servoPin1);
   servo2.attach(servoPin2);
   servo3.attach(servoPin3);
   servo4.attach(servoPin4);
   servo5.attach(servoPin5);
   servo6.attach(servoPin6);
-  node.initNode();
-  node.advertise(pub);
+  
+  nh.loginfo("1");
+  nh.initNode();
+  nh.loginfo("2");
+  nh.advertise(pub);
+  nh.logdebug("3");
   bool_msg.data = true;
-  node.subscribe(controller);
-  goToInitialPose();
+  nh.subscribe(controller);
+  nh.logdebug("INITIALIZED NODE");
+  //goToInitialPose();
 } 
  
  
 void loop() {
-  while(!node.connected()){
-    node.spinOnce();
-    }
-}
-
-//Initial pose to begin the movement
-void goToInitialPose(){
-  servo6.write(180);
-  servo5.write(80);
-  servo4.write(90);
-  servo3.write(90);
-  servo2.write(90);
-  servo1.write(180);
-  delay(1000);
+   nh.spinOnce();
+   delay(50);
+   
 }
 
 void moveServo(Servo servoX, int from, int to, int delayValue){
@@ -116,6 +113,4 @@ void moveServo(Servo servoX, int from, int to, int delayValue){
     delay(delayValue);
   }
   }
-
-  pub.publish(&bool_msg);
 }
