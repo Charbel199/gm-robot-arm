@@ -18,7 +18,7 @@ Servo servo5;   //Range: 90 to 180
 Servo servo6;   //Range: 90 to 180
 
 #define EPSILON 10
-#define DELAY 100
+#define DELAY 10
 
 //SafePoseValues:
 #define servo1_safe 90
@@ -47,6 +47,18 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
 
   // Current positions
   float servo1_pos = servo1.read();
+
+  char servo1_pos_str[6];
+  char servo1_des_pos_str[4];
+  char servo2_des_pos_str[4];
+  char servo3_des_pos_str[4];
+  char servo4_des_pos_str[4];
+  char servo5_des_pos_str[4];
+  char servo6_des_pos_str[4];
+  dtostrf(servo1_pos,2,2,servo1_pos_str);
+  nh.loginfo(servo1_pos_str);
+
+  
   float servo2_pos = servo2.read();
   float servo3_pos = servo3.read();
   float servo4_pos = servo4.read();
@@ -55,30 +67,46 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
 
   //flash LED
   digitalWrite(13, HIGH);   
-  delay(250);              
-  digitalWrite(13, LOW);    
-  delay(250); 
+  delay(250);             
+  
+  if(abs(servo6_des_pos - servo6_pos) > EPSILON){
+  moveServo(servo6, servo6_pos, servo6_des_pos, DELAY);
+  String(servo6_des_pos).toCharArray(servo6_des_pos_str,4);
+  nh.loginfo(servo6_des_pos_str);
+  }
+  
+  if(abs(servo5_des_pos - servo5_pos) > EPSILON){
+  moveServo(servo5, servo5_pos, servo5_des_pos, DELAY);
+  String(servo5_des_pos).toCharArray(servo5_des_pos_str,4);
+  nh.loginfo(servo5_des_pos_str);
+  }
+  
+  if(abs(servo4_des_pos - servo4_pos) > EPSILON){
+  moveServo(servo4, servo4_pos, servo4_des_pos, DELAY);
+  String(servo4_des_pos).toCharArray(servo4_des_pos_str,4);
+  nh.loginfo(servo4_des_pos_str);
+  }
+  
+  if(abs(servo3_des_pos - servo3_pos) > EPSILON){
+  moveServo(servo3, servo3_pos, servo3_des_pos, DELAY);
+  String(servo3_des_pos).toCharArray(servo3_des_pos_str,4);
+  nh.loginfo(servo3_des_pos_str);
+  }
+    
+  if(abs(servo2_des_pos - servo2_pos) > EPSILON){
+  moveServo(servo2, servo2_pos, servo2_des_pos, DELAY);
+  String(servo2_des_pos).toCharArray(servo2_des_pos_str,4);;
+  nh.loginfo(servo2_des_pos_str);
+  }
   
   if(abs(servo1_des_pos - servo1_pos) > EPSILON){
-    moveServo(servo1, servo1_pos, servo1_des_pos, DELAY);
-    }
-  if(abs(servo2_des_pos - servo2_pos) > EPSILON){
-    moveServo(servo2, servo2_pos, servo2_des_pos, DELAY);
-    }
-  if(abs(servo3_des_pos - servo3_pos) > EPSILON){
-    moveServo(servo3, servo3_pos, servo3_des_pos, DELAY);
-    }
-  if(abs(servo4_des_pos - servo4_pos) > EPSILON){
-    moveServo(servo4, servo4_pos, servo4_des_pos, DELAY);
-    }
-  if(abs(servo5_des_pos - servo5_pos) > EPSILON){
-    moveServo(servo5, servo5_pos, servo5_des_pos, DELAY);
-    }
-  if(abs(servo6_des_pos - servo6_pos) > EPSILON){
-    moveServo(servo6, servo6_pos, servo6_des_pos, DELAY);
-    }
+  moveServo(servo1, servo1_pos, servo1_des_pos, DELAY);
+  String(servo1_des_pos).toCharArray(servo1_des_pos_str,4);
+  nh.loginfo(servo1_des_pos_str);
+  }
     
-   
+       
+  digitalWrite(13, LOW); 
   pub.publish(&bool_msg);
   nh.loginfo("COMPLETED MOVE");
   }
