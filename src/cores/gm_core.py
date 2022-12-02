@@ -120,7 +120,7 @@ class GMCore:
         self.vision_core.calibrate()
 
     def on_initial_board(self):
-        if not self.vision_core._is_calibrated:
+        if not self.vision_core.is_calibrated:
             logger.info(f"Calibration is required first")
             return
         self.vision_core.capture_initial_chessboard_layout()
@@ -134,7 +134,7 @@ class GMCore:
         self.control_core.publish(move[0], move[1])
 
     def on_user_move(self):
-        if not self.vision_core._is_calibrated and not self.vision_core._captured_initial_board_layout:
+        if not self.vision_core.is_calibrated and not self.vision_core.captured_initial_board_layout:
             logger.info(f"Calibration and initial board layout capture are required first")
             return
         if not self.chess_core.user_turn:
@@ -152,7 +152,7 @@ class GMCore:
         # self.chess_core.user_side = True
 
     def on_robot_move(self):
-        if not self.vision_core._is_calibrated and not self.vision_core._captured_initial_board_layout:
+        if not self.vision_core.is_calibrated and not self.vision_core.captured_initial_board_layout:
             logger.info(f"Calibration and initial board layout capture are required first")
             return
         if self.chess_core.user_turn:

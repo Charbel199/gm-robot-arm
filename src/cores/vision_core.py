@@ -19,8 +19,8 @@ class VisionCore:
         logger.info(f'Launching Vision Core')
         self.images = []
         self.use_camera = use_camera
-        self._is_calibrated = False
-        self._captured_initial_board_layout = False
+        self.is_calibrated = False
+        self.captured_initial_board_layout = False
 
         self.empty_board_image = None
         self.last_user_squares_change = None
@@ -149,16 +149,16 @@ class VisionCore:
         self.images.append(self.capture_image())
 
     def capture_initial_chessboard_layout(self):
-        if self._captured_initial_board_layout:
+        if self.captured_initial_board_layout:
             logger.info("Already captured initial board layout")
             return
         logger.info("Capturing initial board layout")
         self.update_images()  # Called when pieces are set
-        self._captured_initial_board_layout = True
+        self.captured_initial_board_layout = True
         logger.info("Done capturing initial board layout")
 
     def calibrate(self):
-        if self._is_calibrated:
+        if self.is_calibrated:
             logger.info("Already calibrated")
             return
 
@@ -170,7 +170,7 @@ class VisionCore:
             self.empty_board_image, image_write, self.hsv_black_squares_min, self.hsv_black_squares_max,
             self.hsv_white_squares_min, self.hsv_white_squares_max, board_percentage=0.7)
         self.calibrated_image = image_write
-        self._is_calibrated = True
+        self.is_calibrated = True
         logger.info("Done calibrating board")
 
     def get_user_squares_changed(self) -> List:
