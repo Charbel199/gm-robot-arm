@@ -199,12 +199,13 @@ def is_piece_found(img, threshold=200):
     return 1
 
 
-def get_pieces_diff(imgA, imgB, hsv_min_greenwhite, hsv_max_greenwhite,
-                    hsv_min_blackpurple, hsv_max_blackpurple, ):
+
+def get_pieces_diff(imgA, imgB, hsv_white_pieces_min, hsv_white_pieces_max,
+                    hsv_black_pieces_min, hsv_black_pieces_max):
     imgA_copy = imgA.copy()
     imgA_copy = cv2.cvtColor(imgA_copy, cv2.COLOR_BGR2HSV)
-    imgA_filter_white = cv2.inRange(imgA_copy, hsv_min_greenwhite, hsv_max_greenwhite)
-    imgA_filter_black = cv2.inRange(imgA_copy, hsv_min_blackpurple, hsv_max_blackpurple)
+    imgA_filter_white = cv2.inRange(imgA_copy, hsv_white_pieces_min, hsv_white_pieces_max)
+    imgA_filter_black = cv2.inRange(imgA_copy, hsv_black_pieces_min, hsv_black_pieces_max)
 
     is_A_white = is_piece_found(imgA_filter_white) != 0
     is_A_black = is_piece_found(imgA_filter_black) != 0
@@ -212,8 +213,8 @@ def get_pieces_diff(imgA, imgB, hsv_min_greenwhite, hsv_max_greenwhite,
 
     imgBcopy = imgB.copy()
     imgBcopy = cv2.cvtColor(imgBcopy, cv2.COLOR_BGR2HSV)
-    imgB_filter_white = cv2.inRange(imgBcopy, hsv_min_greenwhite, hsv_max_greenwhite)
-    imgB_filter_black = cv2.inRange(imgBcopy, hsv_min_blackpurple, hsv_max_blackpurple)
+    imgB_filter_white = cv2.inRange(imgBcopy, hsv_white_pieces_min, hsv_white_pieces_max)
+    imgB_filter_black = cv2.inRange(imgBcopy, hsv_black_pieces_min, hsv_black_pieces_max)
     is_B_white = is_piece_found(imgB_filter_white) != 0
     is_B_black = is_piece_found(imgB_filter_black) != 0
     is_B_empty = is_piece_found(imgB_filter_white) == 0 and is_piece_found(imgB_filter_black) == 0
@@ -241,10 +242,10 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
         # score = get_images_diff_histograms(square1, square2)
 
         score = get_pieces_diff(square1, square2,
-                                kwargs['hsv_min_greenwhite'],
-                                kwargs['hsv_max_greenwhite'],
-                                kwargs['hsv_min_blackpurple'],
-                                kwargs['hsv_max_blackpurple'])
+                                kwargs['hsv_white_pieces_min'],
+                                kwargs['hsv_white_pieces_max'],
+                                kwargs['hsv_black_pieces_min'],
+                                kwargs['hsv_black_pieces_max'])
         squares_to_show.append(square1)
         squares_to_show.append(square2)
         squares_to_show_titles.append(f"{i} {str(score)} A")
@@ -292,10 +293,10 @@ def get_squares_changed(squares_with_differences, matrix_2d):
 
 
 # Get squares and coordinates from image
-def get_image_information(image, image_write, hsv_min_b, hsv_max_b, hsv_min_w, hsv_max_w, board_percentage=0.8):
+def get_image_information(image, image_write, hsv_black_squares_min, hsv_black_squares_max, hsv_white_squares_min, hsv_white_squares_max, board_percentage=0.8):
     # Get HSV canny for White and Black squares and OR them
-    res_b = get_hsv_canny(image, hsv_min_b, hsv_max_b)
-    res_w = get_hsv_canny(image, hsv_min_w, hsv_max_w)
+    res_b = get_hsv_canny(image, hsv_black_squares_min, hsv_black_squares_max)
+    res_w = get_hsv_canny(image, hsv_white_squares_min, hsv_white_squares_max)
     res_bw = cv2.bitwise_or(res_b, res_w)
 
     # Estimate minium area of square
