@@ -17,6 +17,8 @@ class VisionCore:
                  hsv_black_pieces_min, hsv_black_pieces_max,
                  use_camera=False):
         logger.info(f'Launching Vision Core')
+        self.temp_camera_image = None
+        self.debug_images = []
         self.images = []
         self.use_camera = use_camera
         self.is_calibrated = False
@@ -90,7 +92,7 @@ class VisionCore:
             if cv2.contourArea(c) > 30:
                 (x, y, w, h) = cv2.boundingRect(c)
                 marker_centers.append([int(x + w / 2), int(y + h / 2)])
-
+        logger.debug(f"Found {len(marker_centers)} markers")
         if len(marker_centers) == 4:
             marker_centers = get_four_corners(marker_centers)
             self.cached_marker_centers = marker_centers
@@ -137,8 +139,7 @@ class VisionCore:
         if not self.use_camera:
             image = self.fake_images.pop(0)
         else:
-            image = None  # TODO: Get from camera through ROS
-            raise Exception('Camera not setup yet')
+            image = self.temp_camera_image
         image = self.preprocess_image(image)
         return image
 
@@ -169,6 +170,10 @@ class VisionCore:
         self.squares, self.matrix_2d, calibration_b, calibration_w, calibration_bw, calibration_processed = get_image_information(
             self.empty_board_image, image_write, self.hsv_black_squares_min, self.hsv_black_squares_max,
             self.hsv_white_squares_min, self.hsv_white_squares_max, board_percentage=0.7)
+        self.debug_images = [calibration_w]
+        self.debug_images.append(calibration_b)
+        self.debug_images.append(calibration_bw)
+        self.debug_images.append(calibration_processed)
         self.calibrated_image = image_write
         self.is_calibrated = True
         logger.info("Done calibrating board")
