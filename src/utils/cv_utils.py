@@ -254,7 +254,7 @@ def get_each_square_diff(imageA, imageB, squares, threshold=0.6, show_box=False,
 
     scores, squares = zip(*sorted(zip(scores, squares), reverse=True))
 
-    main_indices = [i for i in range(len(scores)) if scores[i] is 1]
+    main_indices = [i for i in range(len(scores)) if scores[i] == 1]
     main_scores = [scores[i] for i in main_indices]
     main_squares = [squares[i] for i in main_indices]
 

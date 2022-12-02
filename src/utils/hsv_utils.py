@@ -18,7 +18,7 @@ def parse_hsv_json(file):
         all_hsv_values[f"{k}_min"] = np.array(hsv_values[k][:3])
         all_hsv_values[f"{k}_max"] = np.array(hsv_values[k][3:])
 
-    return hsv_values
+    return all_hsv_values
 
 
 if __name__ == "__main__":
