@@ -18,6 +18,7 @@ Servo servo6;   //Range: 0 to 180
 
 int x;
 String instruction;
+char move_instruction[1];
 float servo1_pos;
 float servo2_pos;
 float servo3_pos;
@@ -42,6 +43,25 @@ void setup() {
 
 void loop() {
   manual_control();
+}
+
+void moveServo(Servo servoX, int from, int to, int delayValue){
+  if(to>90 && to<180){
+    if(from > to){
+        for(int i=from; i>to; i--){
+            servoX.write(i);
+            delay(delayValue);
+            }
+           }
+
+
+  if(from < to){
+  for(int i=from; i<to; i++){
+    servoX.write(i);
+    delay(delayValue);
+  }
+  }
+  }
 }
 
 
@@ -88,8 +108,8 @@ void manual_control(){
    }
 
 void free_drive_control(){
- while (!Serial.available());      // Loop till arduino receives a message
-  instruction = Serial.readString();
+  while (!Serial.available());      // Loop till arduino receives a message
+  Serial.readString().toCharArray(move_instruction, 0); // String to char stupid 
   servo1_pos = servo1.read();
   servo2_pos = servo2.read();
   servo3_pos = servo3.read();
@@ -100,7 +120,7 @@ void free_drive_control(){
   servo_positions = servo_positions + "Servo 1: " + servo1_pos + "\tServo2: " + servo2_pos + "\tServo3: " + servo3_pos + "\tServo4: " + servo4_pos + "\tServo5: " + servo5_pos + "\tServo6: " + servo6_pos; //stupid arduino string concatenation
   Serial.print(servo_positions);
 
-  switch(instruction){
+  switch(move_instruction[0]){
     case 'q': moveServo(servo1, servo1_pos, servo1_pos+SERVO_STEP, DELAY);
     break;
     case 'a': moveServo(servo1, servo1_pos, servo1_pos-SERVO_STEP, DELAY);
@@ -131,24 +151,7 @@ void free_drive_control(){
     case 'h': moveServo(servo6, servo6_pos, servo6_pos-SERVO_STEP, DELAY);
     break;
   }
+  
   Serial.print("Done");
-    }
-   }
-void moveServo(Servo servoX, int from, int to, int delayValue){
-  if(to>90 && to<180){
-    if(from > to){
-        for(int i=from; i>to; i--){
-            servoX.write(i);
-            delay(delayValue);
-            }
-           }
-
-
-  if(from < to){
-  for(int i=from; i<to; i++){
-    servoX.write(i);
-    delay(delayValue);
   }
-  }
-  }
-}
+   
