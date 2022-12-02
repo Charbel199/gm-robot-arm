@@ -14,11 +14,12 @@ Servo servo5;   //Range: 0 to 180
 Servo servo6;   //Range: 0 to 180
 
 #define DELAY 10
-#define SERVO_STEP 2
+#define SERVO_STEP 5
 
 int x;
 String instruction;
-char move_instruction[1];
+String str;
+char move_instruction;
 float servo1_pos;
 float servo2_pos;
 float servo3_pos;
@@ -32,6 +33,7 @@ int value;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(13, OUTPUT);
   servo1.attach(servoPin1);
   servo2.attach(servoPin2);
   servo3.attach(servoPin3);
@@ -42,11 +44,11 @@ void setup() {
 }
 
 void loop() {
-  manual_control();
+  free_drive_control();
 }
 
 void moveServo(Servo servoX, int from, int to, int delayValue){
-  if(to>90 && to<180){
+  if(to>0 && to<180){
     if(from > to){
         for(int i=from; i>to; i--){
             servoX.write(i);
@@ -75,18 +77,30 @@ void manual_control(){
   servo5_pos = servo5.read();
   servo6_pos = servo6.read();
 
-  if(instruction == "Read"){
+  if(instruction == "R"){
+      digitalWrite(13,HIGH);
+      delay(250);
+      digitalWrite(13,LOW);
+      delay(250);
       servo_positions = "";
       servo_positions = servo_positions + "Servo 1: " + servo1_pos + "\tServo2: " + servo2_pos + "\tServo3: " + servo3_pos + "\tServo4: " + servo4_pos + "\tServo5: " + servo5_pos + "\tServo6: " + servo6_pos; //stupid arduino string concatenation
-      Serial.print(servo_positions);
+      Serial.println(servo_positions);
     }
-  else if(instruction == "Write"){
+  else if(instruction == "W"){
+      digitalWrite(13,HIGH);
+      delay(250);
+      digitalWrite(13,LOW);
+      delay(250);
       while (!Serial.available()); //waiting for servo
-      servo = Serial.readString().toInt();
-      Serial.print("Moving servo " + servo);
+      str = Serial.readString();
+      //servo = str.toInt();
+      servo = 1;
+      Serial.println("Moving servo " + str);
       while (!Serial.available()); //waiting for angle
-      value = Serial.readString().toInt();
-      Serial.print("Going to angle " + value);
+      str = Serial.readString();
+      //value = str.toInt();
+      value = 120;
+      Serial.println("Going to angle " + str);
       switch(servo) {
         case 1: moveServo(servo1, servo1_pos, value, DELAY);
         break;
@@ -103,24 +117,26 @@ void manual_control(){
         default:
         break;
         }
-      Serial.print("Done");
+      Serial.println("Done");
     }
    }
 
 void free_drive_control(){
-  while (!Serial.available());      // Loop till arduino receives a message
-  Serial.readString().toCharArray(move_instruction, 0); // String to char stupid 
+  
   servo1_pos = servo1.read();
   servo2_pos = servo2.read();
   servo3_pos = servo3.read();
   servo4_pos = servo4.read();
   servo5_pos = servo5.read();
   servo6_pos = servo6.read();
-
+  servo_positions = "";
   servo_positions = servo_positions + "Servo 1: " + servo1_pos + "\tServo2: " + servo2_pos + "\tServo3: " + servo3_pos + "\tServo4: " + servo4_pos + "\tServo5: " + servo5_pos + "\tServo6: " + servo6_pos; //stupid arduino string concatenation
-  Serial.print(servo_positions);
+  Serial.println(servo_positions);
+  while (!Serial.available());      // Loop till arduino receives a message
+  move_instruction = Serial.read(); // String to char stupid 
+  Serial.println(move_instruction);
 
-  switch(move_instruction[0]){
+  switch(move_instruction){
     case 'q': moveServo(servo1, servo1_pos, servo1_pos+SERVO_STEP, DELAY);
     break;
     case 'a': moveServo(servo1, servo1_pos, servo1_pos-SERVO_STEP, DELAY);
@@ -152,6 +168,6 @@ void free_drive_control(){
     break;
   }
   
-  Serial.print("Done");
+  Serial.println("Done");
   }
    
