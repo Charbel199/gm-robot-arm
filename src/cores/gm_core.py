@@ -17,7 +17,7 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False):
+    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -25,8 +25,9 @@ class GMCore:
         self.engine_side = engine_side
         self.is_simulation = is_simulation
         self.with_sound = with_sound
+        self.use_robot = use_robot
 
-        hsv_values = parse_hsv_json("assets/hsv/gm-colors.json")
+        hsv_values = parse_hsv_json("assets/hsv/gm-colors2.json")
         # Board squares
         self.hsv_white_squares_min = hsv_values['hsv_white_squares_min']
         self.hsv_white_squares_max = hsv_values['hsv_white_squares_max']
@@ -142,8 +143,7 @@ class GMCore:
         self.vision_core.update_images()
         user_squares_changed = self.vision_core.get_user_squares_changed()
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
-        # TODO: Update move based on positions
-        # ...
+        # Update move based on positions
         self.chess_core.update_board(user_move)
         self.chess_core.switch_turn()
 
@@ -161,14 +161,15 @@ class GMCore:
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
 
-        # Send move to arm
-        rospy.set_param('/control/move_complete_counter', len(move_commands))
-        for move_command in move_commands:
-            self.send_move(move_command)
-        # self.chess_core.update_board(arm_move)
-        # WAIT UNTIL MOVE IS COMPLETELY DONE
-        while (rospy.get_param('/control/move_complete_counter') != 0):
-            pass
+        if self.use_robot:
+            # Send move to arm
+            rospy.set_param('/control/move_complete_counter', len(move_commands))
+            for move_command in move_commands:
+                self.send_move(move_command)
+            # self.chess_core.update_board(arm_move)
+            # WAIT UNTIL MOVE IS COMPLETELY DONE
+            while (rospy.get_param('/control/move_complete_counter') != 0):
+                pass
         time.sleep(1)
         self.vision_core.update_images()
         self.chess_core.update_board(arm_move)
