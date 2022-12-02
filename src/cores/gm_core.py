@@ -7,6 +7,7 @@ from pynput import keyboard
 import numpy as np
 import cv2
 from utils.cv_utils import concat_images
+from utils.hsv_utils import parse_hsv_json
 from logger.log import LoggerService
 from rosserial_msgs.msg import Moves
 import rospy
@@ -25,32 +26,20 @@ class GMCore:
         self.is_simulation = is_simulation
         self.with_sound = with_sound
 
-        # Lounge black and white board
-        self.hsv_white_squares_min = np.array([0, 0, 0])
-        self.hsv_white_squares_max = np.array([27, 241, 90])
-        self.hsv_black_squares_min = np.array([0, 0, 84])
-        self.hsv_black_squares_max = np.array([176, 152, 255])
-
-        # Real board
-        # self.hsv_white_squares_min = np.array([0, 0, 0])
-        # self.hsv_white_squares_max = np.array([137 , 175, 174])
-        # self.hsv_black_squares_min = np.array([0, 0, 84])
-        # self.hsv_black_squares_max = np.array([176, 152, 255])
-
+        hsv_values = parse_hsv_json("assets/hsv/gm-colors.json")
+        # Board squares
+        self.hsv_white_squares_min = hsv_values['hsv_white_squares_min']
+        self.hsv_white_squares_max = hsv_values['hsv_white_squares_max']
+        self.hsv_black_squares_min = hsv_values['hsv_black_squares_min']
+        self.hsv_black_squares_max = hsv_values['hsv_black_squares_max']
         # Red markers
-        ## FAKE BOARD
-        self.hsv_markers_min = np.array([0, 177, 240])
-        self.hsv_markers_max = np.array([98, 255, 255])
-        ## REAL BOARD
-        # self.hsv_markers_min = np.array([0, 134, 151])
-        # self.hsv_markers_max = np.array([179, 255, 255])
-
-        # White/Green chess pieces
-        self.hsv_white_pieces_min = np.array([56, 121, 184])
-        self.hsv_white_pieces_max = np.array([65, 255, 255])
-        # Black/Purple chess pieces
-        self.hsv_black_pieces_min = np.array([116, 164, 183])
-        self.hsv_black_pieces_max = np.array([154, 255, 255])
+        self.hsv_markers_min = hsv_values['hsv_markers_min']
+        self.hsv_markers_max = hsv_values['hsv_markers_max']
+        # Chess pieces
+        self.hsv_white_pieces_min = hsv_values['hsv_white_pieces_min']
+        self.hsv_white_pieces_max = hsv_values['hsv_white_pieces_max']
+        self.hsv_black_pieces_min = hsv_values['hsv_black_pieces_min']
+        self.hsv_black_pieces_max = hsv_values['hsv_black_pieces_max']
 
         load_dotenv(find_dotenv())
 
@@ -178,7 +167,7 @@ class GMCore:
             self.send_move(move_command)
         # self.chess_core.update_board(arm_move)
         # WAIT UNTIL MOVE IS COMPLETELY DONE
-        while (rospy.get_param('/control/move_complete_counter')!=0):
+        while (rospy.get_param('/control/move_complete_counter') != 0):
             pass
         time.sleep(1)
         self.vision_core.update_images()

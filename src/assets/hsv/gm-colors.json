@@ -1,0 +1,9 @@
+{
+  "hsv_white_pieces":"(hMin = 56 , sMin = 121, vMin = 184), (hMax = 65 , sMax = 255, vMax = 255)",
+  "hsv_black_pieces":"(hMin = 116 , sMin = 164, vMin = 183), (hMax = 154 , sMax = 255, vMax = 255)",
+
+  "hsv_white_squares":"(hMin = 0 , sMin = 0, vMin = 0), (hMax = 137 , sMax = 175, vMax = 174)",
+  "hsv_black_squares":"(hMin = 0 , sMin = 0, vMin = 0), (hMax = 176 , sMax = 152, vMax = 255)",
+
+  "hsv_markers":"(hMin = 0 , sMin = 134, vMin = 151), (hMax = 179 , sMax = 255, vMax = 255)",
+}
