@@ -91,7 +91,6 @@ class GMCore:
                        "b: Visualize last move analysis\n" \
                        "space: User move\n" \
                        "r: Robot move\n" \
-                       "m: Perform random move\n" \
                        "q: Exit\n" \
                        "================\n"
         return instructions
@@ -104,8 +103,6 @@ class GMCore:
                 self.on_empty_board()
             elif key.char == 'i':
                 self.on_initial_board()
-            # elif key.char == 'm':
-            #     self.random_move()
             elif key.char == 'v':
                 if self._toggle_visualize_last_move:
                     self._toggle_visualize_last_move = False
@@ -137,10 +134,6 @@ class GMCore:
             return
         self.vision_core.capture_initial_chessboard_layout()
 
-    def random_move(self):
-        logger.info("Performing automatic move")
-        self.chess_core.update_board(self.chess_core.get_next_best_move())
-        logger.info("Done performing automatic move")
 
     def send_move(self, move):
         self.control_core.publish(move[0], move[1])
@@ -216,7 +209,8 @@ class GMCore:
             if self.vision_core.temp_camera_image is not None:
                 images_to_show.append(self.vision_core.temp_camera_image)
             if self.vision_core.debug_images is not None:
-                images_to_show.extend(self.vision_core.debug_images)
+                # images_to_show.extend(self.vision_core.debug_images)
+                pass
             if self.vision_core.images_to_show is not None:
                 images_to_show.extend(self.vision_core.images_to_show)
 
