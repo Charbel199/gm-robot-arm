@@ -7,6 +7,7 @@ from pynput import keyboard
 import numpy as np
 import cv2
 from utils.cv_utils import concat_images
+from utils.hsv_utils import parse_hsv_json
 from logger.log import LoggerService
 from rosserial_msgs.msg import Moves
 import rospy
@@ -16,7 +17,7 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False):
+    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -24,45 +25,22 @@ class GMCore:
         self.engine_side = engine_side
         self.is_simulation = is_simulation
         self.with_sound = with_sound
+        self.use_robot = use_robot
 
-        # Lichess White and Blue board
-        # self.hsv_min_b = np.array([0, 69, 0])
-        # self.hsv_max_b = np.array([179, 245, 255])
-        # self.hsv_min_w = np.array([0, 0, 146])
-        # self.hsv_max_w = np.array([179, 66, 234])
-
-        # Lounge brown and white board
-        # self.hsv_min_b = np.array([0, 0, 122])
-        # self.hsv_max_b = np.array([74, 87, 255])timeout
-        # self.hsv_min_w = np.array([7, 0, 0])
-        # self.hsv_max_w = np.array([93, 255, 124])
-
-        # Lounge black and white board
-        self.hsv_min_b = np.array([0, 0, 0])
-        self.hsv_max_b = np.array([27, 241, 90])
-        self.hsv_min_w = np.array([0, 0, 84])
-        self.hsv_max_w = np.array([176, 152, 255])
-
-        # Real board
-        # self.hsv_min_b = np.array([0, 0, 0])
-        # self.hsv_max_b = np.array([137 , 175, 174])
-        # self.hsv_min_w = np.array([0, 0, 84])
-        # self.hsv_max_w = np.array([176, 152, 255])
-
+        hsv_values = parse_hsv_json("assets/hsv/gm-colors2.json")
+        # Board squares
+        self.hsv_white_squares_min = hsv_values['hsv_white_squares_min']
+        self.hsv_white_squares_max = hsv_values['hsv_white_squares_max']
+        self.hsv_black_squares_min = hsv_values['hsv_black_squares_min']
+        self.hsv_black_squares_max = hsv_values['hsv_black_squares_max']
         # Red markers
-        ## FAKE BOARD
-        self.hsv_min_marker = np.array([0, 177, 240])
-        self.hsv_max_marker = np.array([98, 255, 255])
-        ## REAL BOARD
-        # self.hsv_min_marker = np.array([0, 134, 151])
-        # self.hsv_max_marker = np.array([179, 255, 255])
-
-        # White/Green chess pieces
-        self.hsv_min_greenwhite = np.array([56, 121, 184])
-        self.hsv_max_greenwhite = np.array([65, 255, 255])
-        # Black/Purple chess pieces
-        self.hsv_min_blackpurple = np.array([116, 164, 183])
-        self.hsv_max_blackpurple = np.array([154, 255, 255])
+        self.hsv_markers_min = hsv_values['hsv_markers_min']
+        self.hsv_markers_max = hsv_values['hsv_markers_max']
+        # Chess pieces
+        self.hsv_white_pieces_min = hsv_values['hsv_white_pieces_min']
+        self.hsv_white_pieces_max = hsv_values['hsv_white_pieces_max']
+        self.hsv_black_pieces_min = hsv_values['hsv_black_pieces_min']
+        self.hsv_black_pieces_max = hsv_values['hsv_black_pieces_max']
 
         load_dotenv(find_dotenv())
 
@@ -79,11 +57,11 @@ class GMCore:
 
     def initialize_cores(self):
         logger.info(f'Initializing cores')
-        self.vision_core = VisionCore(self.hsv_min_b, self.hsv_max_b,
-                                      self.hsv_min_w, self.hsv_max_w,
-                                      self.hsv_min_marker, self.hsv_max_marker,
-                                      self.hsv_min_greenwhite, self.hsv_max_greenwhite,
-                                      self.hsv_min_blackpurple, self.hsv_max_blackpurple,
+        self.vision_core = VisionCore(self.hsv_white_squares_min, self.hsv_white_squares_max,
+                                      self.hsv_black_squares_min, self.hsv_black_squares_max,
+                                      self.hsv_markers_min, self.hsv_markers_max,
+                                      self.hsv_white_pieces_min, self.hsv_white_pieces_max,
+                                      self.hsv_black_pieces_min, self.hsv_black_pieces_max,
                                       use_camera=self.use_camera)
         self.chess_core = ChessCore(engine_side=self.engine_side, is_simulation=self.is_simulation,
                                     with_sound=self.with_sound,
@@ -142,7 +120,7 @@ class GMCore:
         self.vision_core.calibrate()
 
     def on_initial_board(self):
-        if not self.vision_core._is_calibrated:
+        if not self.vision_core.is_calibrated:
             logger.info(f"Calibration is required first")
             return
         self.vision_core.capture_initial_chessboard_layout()
@@ -156,7 +134,7 @@ class GMCore:
         self.control_core.publish(move[0], move[1])
 
     def on_user_move(self):
-        if not self.vision_core._is_calibrated and not self.vision_core._captured_initial_board_layout:
+        if not self.vision_core.is_calibrated and not self.vision_core.captured_initial_board_layout:
             logger.info(f"Calibration and initial board layout capture are required first")
             return
         if not self.chess_core.user_turn:
@@ -165,8 +143,7 @@ class GMCore:
         self.vision_core.update_images()
         user_squares_changed = self.vision_core.get_user_squares_changed()
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
-        # TODO: Update move based on positions
-        # ...
+        # Update move based on positions
         self.chess_core.update_board(user_move)
         self.chess_core.switch_turn()
 
@@ -175,7 +152,7 @@ class GMCore:
         # self.chess_core.user_side = True
 
     def on_robot_move(self):
-        if not self.vision_core._is_calibrated and not self.vision_core._captured_initial_board_layout:
+        if not self.vision_core.is_calibrated and not self.vision_core.captured_initial_board_layout:
             logger.info(f"Calibration and initial board layout capture are required first")
             return
         if self.chess_core.user_turn:
@@ -184,14 +161,15 @@ class GMCore:
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
 
-        # Send move to arm
-        rospy.set_param('/control/move_complete_counter', len(move_commands))
-        for move_command in move_commands:
-            self.send_move(move_command)
-        # self.chess_core.update_board(arm_move)
-        # WAIT UNTIL MOVE IS COMPLETELY DONE
-        while (rospy.get_param('/control/move_complete_counter')!=0):
-            pass
+        if self.use_robot:
+            # Send move to arm
+            rospy.set_param('/control/move_complete_counter', len(move_commands))
+            for move_command in move_commands:
+                self.send_move(move_command)
+            # self.chess_core.update_board(arm_move)
+            # WAIT UNTIL MOVE IS COMPLETELY DONE
+            while (rospy.get_param('/control/move_complete_counter') != 0):
+                pass
         time.sleep(1)
         self.vision_core.update_images()
         self.chess_core.update_board(arm_move)

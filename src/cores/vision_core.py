@@ -10,17 +10,17 @@ logger = LoggerService.get_instance()
 
 class VisionCore:
     def __init__(self,
-                 hsv_min_b, hsv_max_b,
-                 hsv_min_w, hsv_max_w,
-                 hsv_min_marker, hsv_max_marker,
-                 hsv_min_greenwhite, hsv_max_greenwhite,
-                 hsv_min_blackpurple, hsv_max_blackpurple,
+                 hsv_black_squares_min, hsv_black_squares_max,
+                 hsv_white_squares_min, hsv_white_squares_max,
+                 hsv_markers_min, hsv_markers_max,
+                 hsv_white_pieces_min, hsv_white_pieces_max,
+                 hsv_black_pieces_min, hsv_black_pieces_max,
                  use_camera=False):
         logger.info(f'Launching Vision Core')
         self.images = []
         self.use_camera = use_camera
-        self._is_calibrated = False
-        self._captured_initial_board_layout = False
+        self.is_calibrated = False
+        self.captured_initial_board_layout = False
 
         self.empty_board_image = None
         self.last_user_squares_change = None
@@ -36,16 +36,16 @@ class VisionCore:
         self.cached_image_last_move = None
         self.matrix_2d = None
 
-        self.hsv_min_b = hsv_min_b
-        self.hsv_max_b = hsv_max_b
-        self.hsv_min_w = hsv_min_w
-        self.hsv_max_w = hsv_max_w
-        self.hsv_min_marker = hsv_min_marker
-        self.hsv_max_marker = hsv_max_marker
-        self.hsv_min_greenwhite = hsv_min_greenwhite
-        self.hsv_max_greenwhite = hsv_max_greenwhite
-        self.hsv_min_blackpurple = hsv_min_blackpurple
-        self.hsv_max_blackpurple = hsv_max_blackpurple
+        self.hsv_black_squares_min = hsv_black_squares_min
+        self.hsv_black_squares_max = hsv_black_squares_max
+        self.hsv_white_squares_min = hsv_white_squares_min
+        self.hsv_white_squares_max = hsv_white_squares_max
+        self.hsv_markers_min = hsv_markers_min
+        self.hsv_markers_max = hsv_markers_max
+        self.hsv_white_pieces_min = hsv_white_pieces_min
+        self.hsv_white_pieces_max = hsv_white_pieces_max
+        self.hsv_black_pieces_min = hsv_black_pieces_min
+        self.hsv_black_pieces_max = hsv_black_pieces_max
 
         # empty_image = cv2.imread('assets/moves/real_board/Move_Empty2.jpeg')
         # initial_image = cv2.imread('assets/moves/real_board/Move_Initial.jpeg')
@@ -82,7 +82,7 @@ class VisionCore:
                                ['h8', 'h7', 'h6', 'h5', 'h4', 'h3', 'h2', 'h1']]
 
     def preprocess_image(self, image):
-        res = get_hsv_filter(image, self.hsv_min_marker, self.hsv_max_marker)
+        res = get_hsv_filter(image, self.hsv_markers_min, self.hsv_markers_max)
         res = cv2.dilate(res, np.ones((3, 3), np.uint8))
         contours, hierarchy = cv2.findContours(res, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         marker_centers = []
@@ -149,16 +149,16 @@ class VisionCore:
         self.images.append(self.capture_image())
 
     def capture_initial_chessboard_layout(self):
-        if self._captured_initial_board_layout:
+        if self.captured_initial_board_layout:
             logger.info("Already captured initial board layout")
             return
         logger.info("Capturing initial board layout")
         self.update_images()  # Called when pieces are set
-        self._captured_initial_board_layout = True
+        self.captured_initial_board_layout = True
         logger.info("Done capturing initial board layout")
 
     def calibrate(self):
-        if self._is_calibrated:
+        if self.is_calibrated:
             logger.info("Already calibrated")
             return
 
@@ -167,10 +167,10 @@ class VisionCore:
         image_write = self.empty_board_image.copy()
 
         self.squares, self.matrix_2d, calibration_b, calibration_w, calibration_bw, calibration_processed = get_image_information(
-            self.empty_board_image, image_write, self.hsv_min_b, self.hsv_max_b,
-            self.hsv_min_w, self.hsv_max_w, board_percentage=0.7)
+            self.empty_board_image, image_write, self.hsv_black_squares_min, self.hsv_black_squares_max,
+            self.hsv_white_squares_min, self.hsv_white_squares_max, board_percentage=0.7)
         self.calibrated_image = image_write
-        self._is_calibrated = True
+        self.is_calibrated = True
         logger.info("Done calibrating board")
 
     def get_user_squares_changed(self) -> List:
@@ -191,10 +191,10 @@ class VisionCore:
                                                                                     threshold=0.4,
                                                                                     show_box=True,
                                                                                     image=image_write,
-                                                                                    hsv_min_greenwhite=self.hsv_min_greenwhite,
-                                                                                    hsv_max_greenwhite=self.hsv_max_greenwhite,
-                                                                                    hsv_min_blackpurple=self.hsv_min_blackpurple,
-                                                                                    hsv_max_blackpurple=self.hsv_max_blackpurple,
+                                                                                    hsv_white_pieces_min=self.hsv_white_pieces_min,
+                                                                                    hsv_white_pieces_max=self.hsv_white_pieces_max,
+                                                                                    hsv_black_pieces_min=self.hsv_black_pieces_min,
+                                                                                    hsv_black_pieces_max=self.hsv_black_pieces_max,
                                                                                     )
 
         self.cached_squares_differences_images = squares_differences_images
