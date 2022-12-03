@@ -1,5 +1,5 @@
 import cv2
-from utils.cv_utils import concat_images, get_image_information, get_each_square_diff, get_squares_changed, \
+from utils.cv_utils import get_image_information, get_each_square_diff, get_squares_changed, \
     get_hsv_filter, get_four_corners
 from logger.log import LoggerService
 import numpy as np

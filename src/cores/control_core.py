@@ -7,7 +7,6 @@ from logger.log import LoggerService
 import time
 from utils.move_utils import MOVE_DICT, SAFE_POSE, YEET_POSE
 
-#logger = LoggerService.get_instance()
 
 class ControlCore:
     
