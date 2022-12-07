@@ -11,11 +11,11 @@
 #define servoPin6 6
 
 Servo servo1;   //Range: 90 to 180
-Servo servo2;   //Range: 90 to 180
-Servo servo3;   //Range: 90 to 180 
-Servo servo4;   //Range: 90 to 180
-Servo servo5;   //Range: 90 to 180
-Servo servo6;   //Range: 90 to 180
+Servo servo2;   //Range: 0 to 180
+Servo servo3;   //Range: 0 to 180 
+Servo servo4;   //Range: 0 to 180
+Servo servo5;   //Range: 0 to 180
+Servo servo6;   //Range: 0 to 180
 
 #define EPSILON 10
 #define DELAY 10
