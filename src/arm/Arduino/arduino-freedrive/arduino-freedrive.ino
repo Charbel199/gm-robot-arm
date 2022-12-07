@@ -35,6 +35,7 @@ void setup() {
   Serial.begin(9600);
   pinMode(13, OUTPUT);
   servo1.attach(servoPin1);
+  servo1.write(130);
   servo2.attach(servoPin2);
   servo3.attach(servoPin3);
   servo4.attach(servoPin4);
@@ -48,7 +49,7 @@ void loop() {
 }
 
 void moveServo(Servo servoX, int from, int to, int delayValue){
-  if(to>0 && to<180){
+  if(to>=0 && to<=180){
     if(from > to){
         for(int i=from; i>to; i--){
             servoX.write(i);
@@ -83,7 +84,7 @@ void manual_control(){
       digitalWrite(13,LOW);
       delay(250);
       servo_positions = "";
-      servo_positions = servo_positions + "Servo 1: " + servo1_pos + "\tServo2: " + servo2_pos + "\tServo3: " + servo3_pos + "\tServo4: " + servo4_pos + "\tServo5: " + servo5_pos + "\tServo6: " + servo6_pos; //stupid arduino string concatenation
+      servo_positions = servo_positions + "Servo 1: " + servo1_pos + "\t[" + servo2_pos + ", " + servo3_pos + ", " + servo4_pos + ", " + servo5_pos + ", " + servo6_pos +"]"; //stupid arduino string concatenation
       Serial.println(servo_positions);
     }
   else if(instruction == "W"){
@@ -130,7 +131,7 @@ void free_drive_control(){
   servo5_pos = servo5.read();
   servo6_pos = servo6.read();
   servo_positions = "";
-  servo_positions = servo_positions + "Servo 1: " + servo1_pos + "\tServo2: " + servo2_pos + "\tServo3: " + servo3_pos + "\tServo4: " + servo4_pos + "\tServo5: " + servo5_pos + "\tServo6: " + servo6_pos; //stupid arduino string concatenation
+  servo_positions = servo_positions + "Servo 1: " + servo1_pos + "\t[" + servo2_pos + ", " + servo3_pos + ", " + servo4_pos + ", " + servo5_pos + ", " + servo6_pos +"]"; //stupid arduino string concatenation
   Serial.println(servo_positions);
   while (!Serial.available());      // Loop till arduino receives a message
   move_instruction = Serial.read(); // String to char stupid 
