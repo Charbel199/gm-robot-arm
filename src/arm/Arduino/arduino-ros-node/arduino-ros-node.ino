@@ -18,7 +18,7 @@ Servo servo5;   //Range: 0 to 180
 Servo servo6;   //Range: 0 to 180
 
 #define EPSILON 1
-#define DELAY 5
+#define DELAY 3
 
 //SafePoseValues:
 #define servo1_safe 90
@@ -76,7 +76,7 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   }
   
   if(abs(servo5_des_pos - servo5_pos) > EPSILON){
-  moveServo(servo5, servo5_pos, servo5_des_pos, DELAY*10);
+  moveServo(servo5, servo5_pos, servo5_des_pos, DELAY*6);
   String(servo5_des_pos).toCharArray(servo5_des_pos_str,4);
   nh.loginfo(servo5_des_pos_str);
   }

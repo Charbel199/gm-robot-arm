@@ -1,5 +1,6 @@
 # !/usr/bin/env python
 import rospy
+import copy
 from rosserial_msgs.msg import ServoPositions
 from rosserial_msgs.msg import Moves
 from std_msgs.msg import Bool
@@ -146,20 +147,20 @@ class ControlCore:
         print(f"RECEIVED SEND MOVE {move.type} TO {move.square}")
         move_type = move.type
         if move_type == 'YEET':
-            control_moves = YEET_POSE_SEQUENCE
+            control_moves = copy.deepcopy(YEET_POSE_SEQUENCE)
         else:
-            control_moves = MANY_MOVES_DICT[move.square].copy()
+            control_moves = copy.deepcopy(MANY_MOVES_DICT[move.square])
             print(f"List of moves {control_moves}")
 
         if move_type == 'PICK':
-            for move in control_moves:
-                move.insert(0, self.GRIPPER_CLOSE)
+            for control_move in control_moves:
+                control_move.insert(0, self.GRIPPER_CLOSE)
+               
             #control_moves = [move.insert(0, self.GRIPPER_CLOSE) for move in control_moves]
         else:
-            for move in control_moves:
-                move.insert(0, self.GRIPPER_OPEN)
+            for control_move in control_moves:
+                control_move.insert(0, self.GRIPPER_OPEN)
             #control_moves = [move.insert(0, self.GRIPPER_OPEN) for move in control_moves]
-
         self.many_move_sequence(control_moves)
         print(f"Executed move.")
         pass
@@ -168,7 +169,7 @@ class ControlCore:
         print(f"RECEIVED SEND MOVE {move.type} TO {move.square}")
         move_type = move.type
         if move_type == 'YEET':
-            control_move = YEET_POSE
+            control_move = YEET_POSE.copy()
         else:
             control_move = MOVE_DICT[move.square].copy()
             print(f"BEFORE INSERT {control_move}")
