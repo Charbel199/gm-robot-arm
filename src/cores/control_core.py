@@ -14,11 +14,11 @@ class ControlCore:
         try:
             print(f'Launching Control Core')
             self.pub = rospy.Publisher('/control/arm', ServoPositions, queue_size=10)
-            self.move_sub = rospy.Subscriber('/control/move', Moves, self.send_move)
+            self.move_sub = rospy.Subscriber('/control/move', Moves, self.send_many_moves)
             self.done_sub = rospy.Subscriber('/control/move_done', Bool, self.move_done)
             self.done = False
             self.GRIPPER_CLOSE = 180
-            self.GRIPPER_OPEN = 130
+            self.GRIPPER_OPEN = 153
             rospy.init_node('controller')
             self.rate = rospy.Rate(10)
             self.go_to_safe_pose()
@@ -120,6 +120,7 @@ class ControlCore:
 
     def many_move_sequence(self, control_moves):
         for i, control_move in enumerate(control_moves):
+            print(f"Going to {control_move}")
             if i == len(control_moves)-1:
                 self.pub.publish(control_move[0], control_move[1], control_move[2], control_move[3], control_move[4],
                                  control_move[5])
@@ -130,13 +131,16 @@ class ControlCore:
             self.wait_for_move()
         print(f"First sequence completed")
         control_moves.reverse()
+        
         for control_move in control_moves:
+            print(f"Going back to {control_move}")
             self.pub.publish(control_move[0], control_move[1], control_move[2], control_move[3], control_move[4],
                              control_move[5])
             self.wait_for_move()
         print(f"Second sequence completed")
         current_counter = rospy.get_param('/control/move_complete_counter')
         rospy.set_param('/control/move_complete_counter', current_counter - 1)
+        time.sleep(3)
 
     def send_many_moves(self, move):
         print(f"RECEIVED SEND MOVE {move.type} TO {move.square}")
@@ -148,9 +152,13 @@ class ControlCore:
             print(f"List of moves {control_moves}")
 
         if move_type == 'PICK':
-            control_moves = [move.insert(0, self.GRIPPER_CLOSE) for move in control_moves]
+            for move in control_moves:
+                move.insert(0, self.GRIPPER_CLOSE)
+            #control_moves = [move.insert(0, self.GRIPPER_CLOSE) for move in control_moves]
         else:
-            control_moves = [move.insert(0, self.GRIPPER_OPEN) for move in control_moves]
+            for move in control_moves:
+                move.insert(0, self.GRIPPER_OPEN)
+            #control_moves = [move.insert(0, self.GRIPPER_OPEN) for move in control_moves]
 
         self.many_move_sequence(control_moves)
         print(f"Executed move.")

@@ -17,7 +17,7 @@ Servo servo4;   //Range: 0 to 180
 Servo servo5;   //Range: 0 to 180
 Servo servo6;   //Range: 0 to 180
 
-#define EPSILON 4
+#define EPSILON 1
 #define DELAY 5
 
 //SafePoseValues:
@@ -82,13 +82,13 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   }
   
   if(abs(servo4_des_pos - servo4_pos) > EPSILON){
-  moveServo(servo4, servo4_pos, servo4_des_pos, DELAY);
+  moveServo(servo4, servo4_pos, servo4_des_pos, DELAY*10);
   String(servo4_des_pos).toCharArray(servo4_des_pos_str,4);
   nh.loginfo(servo4_des_pos_str);
   }
   
   if(abs(servo3_des_pos - servo3_pos) > EPSILON){
-  moveServo(servo3, servo3_pos, servo3_des_pos, DELAY);
+  moveServo(servo3, servo3_pos, servo3_des_pos, DELAY*5);
   String(servo3_des_pos).toCharArray(servo3_des_pos_str,4);
   nh.loginfo(servo3_des_pos_str);
   }
@@ -116,7 +116,7 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
 void setup() { 
   pinMode(13, OUTPUT);
   servo1.attach(servoPin1);
-  servo1.write(130);
+  servo1.write(153);
   servo2.attach(servoPin2);
   servo3.attach(servoPin3);
   servo4.attach(servoPin4);
