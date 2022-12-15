@@ -14,7 +14,8 @@ def on_key_press(key):
 
     if 'char' in dir(key):
             print(f'Key {key.char} was pressed')
-            if key.char in ['q','a','w','s','e','d','r','f','t','g','y','h']:
+            if key.char in ['q','a','w','s','e','d','r','f','t','g','y','h',
+            '1','2','3','4','5','6', 'z', 'x', 'c', 'v', 'b', 'n']:
                 listener.stop()
                 write(key.char)
     return

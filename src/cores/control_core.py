@@ -7,7 +7,6 @@ from logger.log import LoggerService
 import time
 from utils.move_utils import MOVE_DICT, SAFE_POSE, YEET_POSE
 
-
 class ControlCore:
     
     def __init__(self):
@@ -41,67 +40,70 @@ class ControlCore:
         pass
 
     def go_to_safe_pose(self):
-        self.pub.publish(self.GRIPPER_OPEN, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4])
+        self.pub.publish(self.GRIPPER_OPEN, SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4], SAFE_POSE[5])
         pass
 
     def move_sequence(self, control_move):
         for i in range(6):
             if i==0:
-                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], control_move[5])
+                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
                 print(f"Sequence {i} completed")
             if i==1:
-                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], control_move[4], control_move[5])
+                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, control_move[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
                 print(f"Sequence {i} completed")
             if i==2:
-                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, SAFE_POSE[0], SAFE_POSE[1], control_move[3], control_move[4], control_move[5])
+                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, control_move[1], SAFE_POSE[2], control_move[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
                 print(f"Sequence {i} completed")
             if i==3:
-                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, SAFE_POSE[0], control_move[2], control_move[3], control_move[4], control_move[5])
+                self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, control_move[1], control_move[2], control_move[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
                 print(f"Sequence {i} completed")
             if i==4:
                 self.pub.publish(self.GRIPPER_CLOSE if control_move[0]==self.GRIPPER_OPEN else self.GRIPPER_OPEN, control_move[1], control_move[2], control_move[3], control_move[4], control_move[5])
                 self.wait_for_move()
                 print(f"Sequence {i} completed")
+            
             if i==5:
                 self.pub.publish(control_move[0], control_move[1], control_move[2], control_move[3], control_move[4], control_move[5])
                 self.wait_for_move()
                 print(f"Sequence {i} completed")
 
         for i in range(5):
-            # if i==0:
-            #     self.pub.publish(control_move[0], control_move[1], control_move[2], control_move[3], control_move[4],SAFE_POSE[4])
-            #     self.wait_for_move()
-            # if i==1:
-            #     self.pub.publish(control_move[0], control_move[1], control_move[2], control_move[3], SAFE_POSE[3], SAFE_POSE[4])
-            #     self.wait_for_move()
-            # if i==2:
-            #     self.pub.publish(control_move[0], control_move[1], control_move[2], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4])
-            #     self.wait_for_move()
-            # if i==3:
-            #     self.pub.publish(control_move[0], control_move[1], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4])
-            #     self.wait_for_move()
-            # if i==4:
-            #     self.pub.publish(control_move[0], SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4])
-            #     self.wait_for_move()
             if i==0:
-                self.pub.publish(control_move[0], SAFE_POSE[0], control_move[2], control_move[3], control_move[4],control_move[5])
+                self.pub.publish(control_move[0], control_move[1], control_move[2], control_move[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
             if i==1:
-                self.pub.publish(control_move[0], SAFE_POSE[0], SAFE_POSE[1], control_move[3], control_move[4],control_move[5])
+                self.pub.publish(control_move[0], control_move[1], control_move[2], SAFE_POSE[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
             if i==2:
-                self.pub.publish(control_move[0], SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], control_move[4],control_move[5])
+                self.pub.publish(control_move[0], control_move[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
             if i==3:
-                self.pub.publish(control_move[0],  SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[4],control_move[5])
+                self.pub.publish(control_move[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4], control_move[5])
                 self.wait_for_move()
             if i==4:
-                self.pub.publish(control_move[0], SAFE_POSE[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4])
+                self.pub.publish(control_move[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4], SAFE_POSE[5])
                 self.wait_for_move()
+            '''
+            if i==0:
+                self.pub.publish(control_move[0], control_move[1], SAFE_POSE[2], control_move[3], control_move[4],control_move[5])
+                self.wait_for_move()
+            if i==1:
+                self.pub.publish(control_move[0], control_move[1], SAFE_POSE[2], SAFE_POSE[3], control_move[4],control_move[5])
+                self.wait_for_move()
+            if i==2:
+                self.pub.publish(control_move[0], control_move[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4],control_move[5])
+                self.wait_for_move()
+            if i==3:
+                self.pub.publish(control_move[0],  control_move[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4],SAFE_POSE[5])
+                self.wait_for_move()
+            if i==4:
+                self.pub.publish(control_move[0], SAFE_POSE[1], SAFE_POSE[2], SAFE_POSE[3], SAFE_POSE[4], SAFE_POSE[5])
+                self.wait_for_move()
+            '''
         current_counter = rospy.get_param('/control/move_complete_counter')
         rospy.set_param('/control/move_complete_counter', current_counter-1)
 
@@ -127,3 +129,9 @@ class ControlCore:
 
 if __name__ == "__main__":
     controller = ControlCore()
+    '''if is_simulation:
+        while True:
+            move_type = input("Type \"YEET\" \"PICK\" or \"PLACE\"")
+            if move_type != "YEET":
+             move_square = input("type move square (e.g. e5)")
+            controller.move_sim.publish([move_type,move_square])'''
