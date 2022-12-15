@@ -82,13 +82,13 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   }
   
   if(abs(servo4_des_pos - servo4_pos) > EPSILON){
-  moveServo(servo4, servo4_pos, servo4_des_pos, DELAY*10);
+  moveServo(servo4, servo4_pos, servo4_des_pos, DELAY*2);
   String(servo4_des_pos).toCharArray(servo4_des_pos_str,4);
   nh.loginfo(servo4_des_pos_str);
   }
   
   if(abs(servo3_des_pos - servo3_pos) > EPSILON){
-  moveServo(servo3, servo3_pos, servo3_des_pos, DELAY*5);
+  moveServo(servo3, servo3_pos, servo3_des_pos, DELAY*2);
   String(servo3_des_pos).toCharArray(servo3_des_pos_str,4);
   nh.loginfo(servo3_des_pos_str);
   }

@@ -18,7 +18,7 @@ class ControlCore:
             self.done_sub = rospy.Subscriber('/control/move_done', Bool, self.move_done)
             self.done = False
             self.GRIPPER_CLOSE = 180
-            self.GRIPPER_OPEN = 153
+            self.GRIPPER_OPEN = 140
             rospy.init_node('controller')
             self.rate = rospy.Rate(10)
             self.go_to_safe_pose()
@@ -140,7 +140,7 @@ class ControlCore:
         print(f"Second sequence completed")
         current_counter = rospy.get_param('/control/move_complete_counter')
         rospy.set_param('/control/move_complete_counter', current_counter - 1)
-        time.sleep(3)
+        #time.sleep(3)
 
     def send_many_moves(self, move):
         print(f"RECEIVED SEND MOVE {move.type} TO {move.square}")

@@ -13,7 +13,7 @@ Servo servo4;   //Range: 0 to 180
 Servo servo5;   //Range: 0 to 180
 Servo servo6;   //Range: 0 to 180
 
-#define DELAY 10
+#define DELAY 5
 #define SERVO_STEP 5
 #define SERVO_STEP_SMALL 2
 
