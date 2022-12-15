@@ -109,7 +109,13 @@ class ChessCore:
         return self.engine.visualizer.get_board_image()
 
     def deduce_move_from_squares(self, squares):
-        return self.engine.deduce_move(squares)
+        if not self.is_simulation:
+            next_best_move = self.engine.deduce_move(squares)
+        else:
+            next_best_move = self.fake_moves_white.pop(0) if self.engine_side == "BLACK" else self.fake_moves_black.pop(
+                0)
+
+        return next_best_move
 
     def get_move_commands(self, move):
         return self.engine.get_move_commands(move)
