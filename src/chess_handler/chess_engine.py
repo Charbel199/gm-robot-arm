@@ -24,6 +24,12 @@ class ChessEngine:
         else:
             logger.info(f"Move {move} is not valid.")
 
+    def check_if_checkmate(self):
+        return self.visualizer.board.is_checkmate()
+
+    def check_if_check(self):
+        return self.visualizer.board.is_check()
+
     def get_board(self, white_side=True):
         return self.stockfish.get_board_visual(white_side)
 
@@ -58,7 +64,6 @@ class ChessEngine:
             commands.append(["PLACE", second_square])
         # En passant
         if self.stockfish.will_move_be_a_capture(move) == self.stockfish.Capture.EN_PASSANT:
-
             piece_to_remove_square = f"{first_square_row}{second_square_column}"
             commands.append(["PICK", piece_to_remove_square])
             commands.append(["YEET", ""])
@@ -68,7 +73,8 @@ class ChessEngine:
         # If move
         if self.stockfish.will_move_be_a_capture(move) == self.stockfish.Capture.NO_CAPTURE:
             # If castle
-            if 'KING' in first_square_piece.name and first_square_column == 'e' and (second_square_column == 'c' or second_square_column == 'g'):
+            if 'KING' in first_square_piece.name and first_square_column == 'e' and (
+                    second_square_column == 'c' or second_square_column == 'g'):
                 if second_square == "c1":
                     rook_square = "a1"
                     rook_empty_square = "d1"

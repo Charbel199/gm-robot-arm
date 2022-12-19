@@ -33,7 +33,7 @@ class ChessCore:
         self.current_board = self.get_board()
         logger.info(f'Stockfish engine with {os.environ.get("ELO_RATING")} ELO rating launched ...')
 
-        self.fake_moves_black = ["e7e5", "e5d4"]
+        self.fake_moves_black = ["e7e5", "d8h4"]
         self.fake_moves_white = ["e2e4", "d2d4", "d1d4"]
 
     def switch_turn(self):
@@ -55,6 +55,12 @@ class ChessCore:
         if self.with_sound:
             play_sound()
 
+    def check_if_checkmate(self):
+        return self.engine.check_if_checkmate()
+
+    def check_if_check(self):
+        return self.engine.check_if_check()
+
     def get_clock(self):
         mins1, secs1 = divmod(self.user_timer, 60)
         timer1 = f"{int(mins1)}:{'' if secs1 > 10 else '0'}{math.floor(secs1)}"
@@ -68,6 +74,15 @@ class ChessCore:
                 clock[:, :256] = (255, 255, 0)
             else:
                 clock[:, 256:] = (255, 255, 0)
+
+        if self.check_if_checkmate():
+            clock[:, :] = (0, 0, 255)
+            cv2.putText(clock, text='YOU CHECKMATED GM ARM' if self.user_turn else 'GM ARM DESTROYED YOU',
+                        org=(120, 300),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=(0, 0, 0),
+                        thickness=1, lineType=cv2.LINE_AA)
+            return clock
+
         cv2.putText(clock, text=timer1, org=(128, 256),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0, 0, 0),
                     thickness=2, lineType=cv2.LINE_AA)
@@ -81,6 +96,7 @@ class ChessCore:
         cv2.putText(clock, text='Engine timer', org=(300, 370),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=(0, 0, 0),
                     thickness=1, lineType=cv2.LINE_AA)
+
         return clock
 
     def get_board(self):
@@ -104,7 +120,8 @@ class ChessCore:
         if not self.is_simulation:
             next_best_move = self.engine.get_next_best_move()
         else:
-            next_best_move = self.fake_moves_black.pop(0) if self.engine_side == "BLACK" else self.fake_moves_white.pop(0)
+            next_best_move = self.fake_moves_black.pop(0) if self.engine_side == "BLACK" else self.fake_moves_white.pop(
+                0)
 
         logger.info(f"Next best move is {next_best_move}")
         return next_best_move

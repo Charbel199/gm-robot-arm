@@ -17,7 +17,8 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False, use_previous_calibrated_board = False):
+    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False,
+                 use_previous_calibrated_board=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -134,7 +135,6 @@ class GMCore:
             return
         self.vision_core.capture_initial_chessboard_layout()
 
-
     def send_move(self, move):
         self.control_core.publish(move[0], move[1])
 
@@ -150,7 +150,12 @@ class GMCore:
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
         # Update move based on positions
         self.chess_core.update_board(user_move)
-        self.chess_core.switch_turn()
+
+        # Check if checkmate
+        if self.chess_core.check_if_checkmate():
+            logger.info(f"You checkmated GM arm!")
+        else:
+            self.chess_core.switch_turn()
 
         # Wait x ms
         # self.on_robot_move()
@@ -176,9 +181,15 @@ class GMCore:
             # WAIT UNTIL MOVE IS COMPLETELY DONE
             while (rospy.get_param('/control/move_complete_counter') != 0):
                 pass
-        time.sleep(1)
+        time.sleep(5)
         self.vision_core.update_images()
-        self.chess_core.switch_turn()
+
+        # Check if checkmate
+        if self.chess_core.check_if_checkmate():
+            logger.info(f"GM arm just checkmated you!")
+            self.send_move(["DANCE", ""])
+        else:
+            self.chess_core.switch_turn()
 
     def spin(self):
         logger.info(f'Spinning ...')
