@@ -1,9 +1,9 @@
 {
-  "hsv_white_pieces":"(hMin = 56 , sMin = 121, vMin = 184), (hMax = 65 , sMax = 255, vMax = 255)",
-  "hsv_black_pieces":"(hMin = 116 , sMin = 164, vMin = 183), (hMax = 154 , sMax = 255, vMax = 255)",
+  "hsv_white_pieces":"(hMin = 64 , sMin = 115, vMin = 71), (hMax = 119 , sMax = 251, vMax = 193)",
+  "hsv_black_pieces":"(hMin = 0 , sMin = 74, vMin = 81), (hMax = 7 , sMax = 246, vMax = 255)",
 
-  "hsv_white_squares":"(hMin = 51 , sMin = 0, vMin = 100), (hMax = 141 , sMax = 62, vMax = 255)",
+  "hsv_white_squares":"(hMin = 51 , sMin = 0, vMin = 176), (hMax = 141 , sMax = 255, vMax = 255)",
   "hsv_black_squares":"(hMin = 0 , sMin = 0, vMin = 0), (hMax = 179 , sMax = 255, vMax = 87)",
 
-  "hsv_markers":"(hMin = 37 , sMin = 64, vMin = 72), (hMax = 84 , sMax = 255, vMax = 219)"
+  "hsv_markers":"(hMin = 66 , sMin = 24, vMin = 89), (hMax = 100 , sMax = 131, vMax = 151)"
 }

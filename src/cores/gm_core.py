@@ -29,7 +29,7 @@ class GMCore:
         self.use_robot = use_robot
         self.use_previous_calibrated_board = use_previous_calibrated_board
 
-        hsv_values = parse_hsv_json("assets/hsv/gm-colors2.json")
+        hsv_values = parse_hsv_json("assets/hsv/gm-colors-final.json")
         # Board squares
         self.hsv_white_squares_min = hsv_values['hsv_white_squares_min']
         self.hsv_white_squares_max = hsv_values['hsv_white_squares_max']
