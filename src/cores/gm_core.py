@@ -170,7 +170,7 @@ class GMCore:
             return
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
-        self.chess_core.update_board(arm_move)
+
 
         if self.use_robot:
             # Send move to arm
@@ -182,7 +182,8 @@ class GMCore:
             # WAIT UNTIL MOVE IS COMPLETELY DONE
             while (rospy.get_param('/control/move_complete_counter') != 0):
                 pass
-        time.sleep(5)
+        self.chess_core.update_board(arm_move)
+        time.sleep(1)
         self.vision_core.update_images()
 
         # Check if checkmate
