@@ -165,6 +165,7 @@ class GMCore:
             return
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
+        self.chess_core.update_board(arm_move)
 
         if self.use_robot:
             # Send move to arm
@@ -177,7 +178,6 @@ class GMCore:
                 pass
         time.sleep(1)
         self.vision_core.update_images()
-        self.chess_core.update_board(arm_move)
         self.chess_core.switch_turn()
 
     def spin(self):
