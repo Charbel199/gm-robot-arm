@@ -74,6 +74,15 @@ class ChessCore:
                 clock[:, :256] = (255, 255, 0)
             else:
                 clock[:, 256:] = (255, 255, 0)
+
+        if self.check_if_checkmate():
+            clock[:, :] = (0, 0, 255)
+            cv2.putText(clock, text='YOU CHECKMATED GM ARM' if self.user_turn else 'GM ARM DESTROYED YOU',
+                        org=(120, 300),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=(0, 0, 0),
+                        thickness=1, lineType=cv2.LINE_AA)
+            return clock
+
         cv2.putText(clock, text=timer1, org=(128, 256),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(0, 0, 0),
                     thickness=2, lineType=cv2.LINE_AA)
@@ -87,6 +96,7 @@ class ChessCore:
         cv2.putText(clock, text='Engine timer', org=(300, 370),
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=(0, 0, 0),
                     thickness=1, lineType=cv2.LINE_AA)
+
         return clock
 
     def get_board(self):
