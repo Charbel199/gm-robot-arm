@@ -33,7 +33,7 @@ class ChessCore:
         self.current_board = self.get_board()
         logger.info(f'Stockfish engine with {os.environ.get("ELO_RATING")} ELO rating launched ...')
 
-        self.fake_moves_black = ["e7e5", "e5d4"]
+        self.fake_moves_black = ["e7e5", "d8h4"]
         self.fake_moves_white = ["e2e4", "d2d4", "d1d4"]
 
     def switch_turn(self):
@@ -54,6 +54,12 @@ class ChessCore:
         # Play sound
         if self.with_sound:
             play_sound()
+
+    def check_if_checkmate(self):
+        return self.engine.check_if_checkmate()
+
+    def check_if_check(self):
+        return self.engine.check_if_check()
 
     def get_clock(self):
         mins1, secs1 = divmod(self.user_timer, 60)
@@ -104,7 +110,8 @@ class ChessCore:
         if not self.is_simulation:
             next_best_move = self.engine.get_next_best_move()
         else:
-            next_best_move = self.fake_moves_black.pop(0) if self.engine_side == "BLACK" else self.fake_moves_white.pop(0)
+            next_best_move = self.fake_moves_black.pop(0) if self.engine_side == "BLACK" else self.fake_moves_white.pop(
+                0)
 
         logger.info(f"Next best move is {next_best_move}")
         return next_best_move
