@@ -85,6 +85,9 @@ class VisionCore:
                                ['f8', 'f7', 'f6', 'f5', 'f4', 'f3', 'f2', 'f1'],
                                ['g8', 'g7', 'g6', 'g5', 'g4', 'g3', 'g2', 'g1'],
                                ['h8', 'h7', 'h6', 'h5', 'h4', 'h3', 'h2', 'h1']]
+        self.chessboard_map.reverse()
+        for c in self.chessboard_map:
+            c.reverse()
 
     def preprocess_image(self, image):
         res = get_hsv_filter(image, self.hsv_markers_min, self.hsv_markers_max)
