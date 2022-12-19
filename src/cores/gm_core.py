@@ -17,7 +17,8 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False, use_previous_calibrated_board = False):
+    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False,
+                 use_previous_calibrated_board=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -134,7 +135,6 @@ class GMCore:
             return
         self.vision_core.capture_initial_chessboard_layout()
 
-
     def send_move(self, move):
         self.control_core.publish(move[0], move[1])
 
@@ -154,9 +154,8 @@ class GMCore:
         # Check if checkmate
         if self.chess_core.check_if_checkmate():
             logger.info(f"You checkmated GM arm!")
-
-
-        self.chess_core.switch_turn()
+        else:
+            self.chess_core.switch_turn()
 
         # Wait x ms
         # self.on_robot_move()
@@ -188,10 +187,9 @@ class GMCore:
         # Check if checkmate
         if self.chess_core.check_if_checkmate():
             logger.info(f"GM arm just checkmated you!")
-            self.send_move(["DANCE",""])
-            pass
-
-        self.chess_core.switch_turn()
+            self.send_move(["DANCE", ""])
+        else:
+            self.chess_core.switch_turn()
 
     def spin(self):
         logger.info(f'Spinning ...')
