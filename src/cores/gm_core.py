@@ -150,6 +150,12 @@ class GMCore:
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
         # Update move based on positions
         self.chess_core.update_board(user_move)
+
+        # Check if checkmate
+        if self.chess_core.check_if_checkmate():
+            logger.info(f"You checkmated GM arm!")
+
+
         self.chess_core.switch_turn()
 
         # Wait x ms
@@ -176,8 +182,15 @@ class GMCore:
             # WAIT UNTIL MOVE IS COMPLETELY DONE
             while (rospy.get_param('/control/move_complete_counter') != 0):
                 pass
-        time.sleep(1)
+        time.sleep(5)
         self.vision_core.update_images()
+
+        # Check if checkmate
+        if self.chess_core.check_if_checkmate():
+            logger.info(f"GM arm just checkmated you!")
+            self.send_move(["DANCE",""])
+            pass
+
         self.chess_core.switch_turn()
 
     def spin(self):
