@@ -175,6 +175,7 @@ class GMCore:
         if self.use_robot:
             # Send move to arm
             rospy.set_param('/control/move_complete_counter', len(move_commands))
+            
             for move_command in move_commands:
                 self.send_move(move_command)
             # self.chess_core.update_board(arm_move)
