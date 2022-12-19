@@ -17,7 +17,7 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False):
+    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False, use_previous_calibrated_board = False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
@@ -26,6 +26,7 @@ class GMCore:
         self.is_simulation = is_simulation
         self.with_sound = with_sound
         self.use_robot = use_robot
+        self.use_previous_calibrated_board = use_previous_calibrated_board
 
         hsv_values = parse_hsv_json("assets/hsv/gm-colors2.json")
         # Board squares
@@ -72,6 +73,7 @@ class GMCore:
                                       self.hsv_markers_min, self.hsv_markers_max,
                                       self.hsv_white_pieces_min, self.hsv_white_pieces_max,
                                       self.hsv_black_pieces_min, self.hsv_black_pieces_max,
+                                      use_previous_calibrated_board=self.use_previous_calibrated_board,
                                       use_camera=self.use_camera)
         self.chess_core = ChessCore(engine_side=self.engine_side, is_simulation=self.is_simulation,
                                     with_sound=self.with_sound,

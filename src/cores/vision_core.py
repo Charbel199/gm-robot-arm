@@ -15,6 +15,7 @@ class VisionCore:
                  hsv_markers_min, hsv_markers_max,
                  hsv_white_pieces_min, hsv_white_pieces_max,
                  hsv_black_pieces_min, hsv_black_pieces_max,
+                 use_previous_calibrated_board=False,
                  use_camera=False):
         logger.info(f'Launching Vision Core')
         self.temp_camera_image = None
@@ -23,11 +24,13 @@ class VisionCore:
         self.use_camera = use_camera
         self.is_calibrated = False
         self.captured_initial_board_layout = False
+        self.use_previous_calibrated_board = use_previous_calibrated_board
 
         self.empty_board_image = None
         self.last_user_squares_change = None
         self.calibrated_image = None
         self.images_to_show = None
+        self.empty_board_image_path = "assets/moves/calibrated_board/board.jpg"
 
         self.height, self.width = 600, 600
         self.image_buffer_size = 6
@@ -89,7 +92,7 @@ class VisionCore:
         contours, hierarchy = cv2.findContours(res, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         marker_centers = []
         for c in contours:
-            if cv2.contourArea(c) > 30:
+            if cv2.contourArea(c) > 100:
                 (x, y, w, h) = cv2.boundingRect(c)
                 marker_centers.append([int(x + w / 2), int(y + h / 2)])
         logger.debug(f"Found {len(marker_centers)} markers")
@@ -164,7 +167,12 @@ class VisionCore:
             return
 
         logger.info("Calibrating board")
-        self.empty_board_image = self.capture_image()  # Capture empty board and set it as
+        if self.use_previous_calibrated_board:
+            self.empty_board_image = cv2.imread(self.empty_board_image_path)
+        else:
+            self.empty_board_image = self.capture_image()  # Capture empty board
+            cv2.imwrite(self.empty_board_image_path, self.empty_board_image)
+
         image_write = self.empty_board_image.copy()
 
         self.squares, self.matrix_2d, calibration_b, calibration_w, calibration_bw, calibration_processed = get_image_information(
