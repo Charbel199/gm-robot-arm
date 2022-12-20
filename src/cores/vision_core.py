@@ -30,7 +30,7 @@ class VisionCore:
         self.last_user_squares_change = None
         self.calibrated_image = None
         self.images_to_show = None
-        self.empty_board_image_path = "assets/moves/calibrated_board/board.jpg"
+        self.empty_board_image_path = "assets/moves/lab_board/board.jpg"
 
         self.height, self.width = 600, 600
         self.image_buffer_size = 6
@@ -95,7 +95,7 @@ class VisionCore:
         contours, hierarchy = cv2.findContours(res, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         marker_centers = []
         for c in contours:
-            if cv2.contourArea(c) > 100:
+            if cv2.contourArea(c) > 200:
                 (x, y, w, h) = cv2.boundingRect(c)
                 marker_centers.append([int(x + w / 2), int(y + h / 2)])
         logger.debug(f"Found {len(marker_centers)} markers")

@@ -29,7 +29,7 @@ class GMCore:
         self.use_robot = use_robot
         self.use_previous_calibrated_board = use_previous_calibrated_board
 
-        hsv_values = parse_hsv_json("assets/hsv/gm-colors-final.json")
+        hsv_values = parse_hsv_json("assets/hsv/gm-colors-lab.json")
         # Board squares
         self.hsv_white_squares_min = hsv_values['hsv_white_squares_min']
         self.hsv_white_squares_max = hsv_values['hsv_white_squares_max']
@@ -186,6 +186,8 @@ class GMCore:
                 pass
         self.chess_core.update_board(arm_move)
         time.sleep(1)
+        if not self.use_robot:
+            time.sleep(5)
         self.vision_core.update_images()
 
         # Check if checkmate
@@ -233,7 +235,7 @@ class GMCore:
             labels = [str(i) for i in range(len(images_to_show))]
             images = concat_images(images_to_show, labels)
             cv2.namedWindow("Images ", cv2.WND_PROP_FULLSCREEN)
-            cv2.setWindowProperty("Images ",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+            # cv2.setWindowProperty("Images ",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
             cv2.imshow('Images ', images)
             if cv2.waitKey(33) == ord('q'):
                 logger.info("Terminating ... \n\n\n")
