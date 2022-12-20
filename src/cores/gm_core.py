@@ -17,14 +17,15 @@ logger = LoggerService.get_instance()
 
 
 class GMCore:
-    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation=False, with_sound=False, use_robot=False,
+    def __init__(self, engine_side="BLACK", use_camera=False, is_simulation_user=False, is_simulation_robot =False, with_sound=False, use_robot=False,
                  use_previous_calibrated_board=False):
         logger.info(f'Launching GM Core')
         # Print instructions
         logger.info(self.get_instructions())
         self.use_camera = use_camera
         self.engine_side = engine_side
-        self.is_simulation = is_simulation
+        self.is_simulation_user = is_simulation_user
+        self.is_simulation_robot = is_simulation_robot
         self.with_sound = with_sound
         self.use_robot = use_robot
         self.use_previous_calibrated_board = use_previous_calibrated_board
@@ -76,7 +77,7 @@ class GMCore:
                                       self.hsv_black_pieces_min, self.hsv_black_pieces_max,
                                       use_previous_calibrated_board=self.use_previous_calibrated_board,
                                       use_camera=self.use_camera)
-        self.chess_core = ChessCore(engine_side=self.engine_side, is_simulation=self.is_simulation,
+        self.chess_core = ChessCore(engine_side=self.engine_side, is_simulation_user=self.is_simulation_user, is_simulation_robot=self.is_simulation_robot,
                                     with_sound=self.with_sound,
                                     time_increment=5)
         self._toggle_visualize_last_move = False
