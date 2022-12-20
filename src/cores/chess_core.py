@@ -39,6 +39,9 @@ class ChessCore:
         self.fake_moves_black = ["e7e5", "f8c5", "d8f6", "g7g5", "f6f2"]
         self.fake_moves_white = ["e2e4", "g1f3", "f1c4", "d2d3", "f3g5"]
 
+        # self.fake_moves_black = ["e7e5", "d8f6", "f6f2"]
+        # self.fake_moves_white = ["e2e3", "e3e4", "d2d4"]
+
     def switch_turn(self):
         self.game_started = True
         # Increment timer

@@ -70,7 +70,7 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   delay(250);             
   
   if(abs(servo6_des_pos - servo6_pos) > EPSILON){
-  moveServo(servo6, servo6_pos, servo6_des_pos, DELAY);
+  moveServo(servo6, servo6_pos, servo6_des_pos, DELAY*4);
   String(servo6_des_pos).toCharArray(servo6_des_pos_str,4);
   nh.loginfo(servo6_des_pos_str);
   }

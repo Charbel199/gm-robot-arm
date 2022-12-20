@@ -150,12 +150,14 @@ class GMCore:
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
         # Update move based on positions
         self.chess_core.update_board(user_move)
-
+        
         # Check if checkmate
         if self.chess_core.check_if_checkmate():
             logger.info(f"You checkmated GM arm!")
         else:
             self.chess_core.switch_turn()
+            time.sleep(2)
+            self.on_robot_move()
 
         # Wait x ms
         # self.on_robot_move()
@@ -189,6 +191,7 @@ class GMCore:
         # Check if checkmate
         if self.chess_core.check_if_checkmate():
             logger.info(f"GM arm just checkmated you!")
+            time.sleep(5)
             self.send_move(["DANCE", ""])
         else:
             self.chess_core.switch_turn()
@@ -229,6 +232,8 @@ class GMCore:
 
             labels = [str(i) for i in range(len(images_to_show))]
             images = concat_images(images_to_show, labels)
+            cv2.namedWindow("Images ", cv2.WND_PROP_FULLSCREEN)
+            cv2.setWindowProperty("Images ",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
             cv2.imshow('Images ', images)
             if cv2.waitKey(33) == ord('q'):
                 logger.info("Terminating ... \n\n\n")

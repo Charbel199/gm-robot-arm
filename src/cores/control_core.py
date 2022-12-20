@@ -176,6 +176,9 @@ class ControlCore:
             control_moves = copy.deepcopy(MANY_MOVES_DICT[move.square])
             print(f"List of moves {control_moves}")
 
+        if (move_type == 'PLACE')&(move.square == 'f2'): #hack for f2 place only
+            control_moves = copy.deepcopy(MANY_MOVES_DICT['f22'])
+            
         if move_type == 'PICK':
             for control_move in control_moves:
                 control_move.insert(0, self.GRIPPER_CLOSE) 
@@ -184,6 +187,9 @@ class ControlCore:
             for control_move in control_moves:
                 control_move.insert(0, self.GRIPPER_OPEN)
             #control_moves = [move.insert(0, self.GRIPPER_OPEN) for move in control_moves]
+
+        
+
         self.many_move_sequence(control_moves)
         print(f"Executed move.")
 
@@ -199,6 +205,8 @@ class ControlCore:
             control_move.insert(0, self.GRIPPER_CLOSE)
         else:
             control_move.insert(0, self.GRIPPER_OPEN)
+
+
 
         print(f"AFTER INSERT Control move: {control_move}")
         self.move_sequence(control_move)
