@@ -17,16 +17,16 @@ Servo servo4;   //Range: 0 to 180
 Servo servo5;   //Range: 0 to 180
 Servo servo6;   //Range: 0 to 180
 
-#define EPSILON 4
-#define DELAY 5
+#define EPSILON 1
+#define DELAY 3
 
 //SafePoseValues:
-#define servo1_safe 90
-#define servo2_safe 90
+#define servo1_safe 142
+#define servo2_safe 0
 #define servo3_safe 90
-#define servo4_safe 90
-#define servo5_safe 90
-#define servo6_safe 180
+#define servo4_safe 0
+#define servo5_safe 180
+#define servo6_safe 90
 
 
 ros::NodeHandle nh;
@@ -70,25 +70,25 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   delay(250);             
   
   if(abs(servo6_des_pos - servo6_pos) > EPSILON){
-  moveServo(servo6, servo6_pos, servo6_des_pos, DELAY);
+  moveServo(servo6, servo6_pos, servo6_des_pos, DELAY*4);
   String(servo6_des_pos).toCharArray(servo6_des_pos_str,4);
   nh.loginfo(servo6_des_pos_str);
   }
   
   if(abs(servo5_des_pos - servo5_pos) > EPSILON){
-  moveServo(servo5, servo5_pos, servo5_des_pos, DELAY*10);
+  moveServo(servo5, servo5_pos, servo5_des_pos, DELAY*6);
   String(servo5_des_pos).toCharArray(servo5_des_pos_str,4);
   nh.loginfo(servo5_des_pos_str);
   }
   
   if(abs(servo4_des_pos - servo4_pos) > EPSILON){
-  moveServo(servo4, servo4_pos, servo4_des_pos, DELAY);
+  moveServo(servo4, servo4_pos, servo4_des_pos, DELAY*2);
   String(servo4_des_pos).toCharArray(servo4_des_pos_str,4);
   nh.loginfo(servo4_des_pos_str);
   }
   
   if(abs(servo3_des_pos - servo3_pos) > EPSILON){
-  moveServo(servo3, servo3_pos, servo3_des_pos, DELAY);
+  moveServo(servo3, servo3_pos, servo3_des_pos, DELAY*2);
   String(servo3_des_pos).toCharArray(servo3_des_pos_str,4);
   nh.loginfo(servo3_des_pos_str);
   }
@@ -100,7 +100,7 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
   }
   
   if(abs(servo1_des_pos - servo1_pos) > EPSILON){
-  moveServo(servo1, servo1_pos, servo1_des_pos, DELAY);
+  moveServo(servo1, servo1_pos, servo1_des_pos, DELAY*5);
   String(servo1_des_pos).toCharArray(servo1_des_pos_str,4);
   nh.loginfo(servo1_des_pos_str);
   }
@@ -116,12 +116,17 @@ void message(const rosserial_msgs::ServoPositions& servo_positions){
 void setup() { 
   pinMode(13, OUTPUT);
   servo1.attach(servoPin1);
-  servo1.write(130);
+  servo1.write(servo1_safe);
   servo2.attach(servoPin2);
+  servo2.write(servo2_safe);
   servo3.attach(servoPin3);
+  servo3.write(servo3_safe);
   servo4.attach(servoPin4);
+  servo4.write(servo4_safe);
   servo5.attach(servoPin5);
+  servo5.write(servo5_safe);
   servo6.attach(servoPin6);
+  servo6.write(servo6_safe);
   
   nh.loginfo("1");
   nh.initNode();

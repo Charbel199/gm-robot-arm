@@ -13,9 +13,16 @@ Servo servo4;   //Range: 0 to 180
 Servo servo5;   //Range: 0 to 180
 Servo servo6;   //Range: 0 to 180
 
-#define DELAY 10
+#define DELAY 5
 #define SERVO_STEP 5
 #define SERVO_STEP_SMALL 2
+
+#define servo1_safe 146
+#define servo2_safe 0
+#define servo3_safe 90
+#define servo4_safe 0
+#define servo5_safe 180
+#define servo6_safe 90
 
 int x;
 String instruction;
@@ -36,12 +43,17 @@ void setup() {
   Serial.begin(9600);
   pinMode(13, OUTPUT);
   servo1.attach(servoPin1);
-  servo1.write(130);
+  servo1.write(servo1_safe);
   servo2.attach(servoPin2);
+  servo2.write(servo2_safe);
   servo3.attach(servoPin3);
+  servo3.write(servo3_safe);
   servo4.attach(servoPin4);
+  servo4.write(servo4_safe);
   servo5.attach(servoPin5);
+  servo5.write(servo5_safe);
   servo6.attach(servoPin6);
+  servo6.write(servo6_safe);
   Serial.setTimeout(1);
 }
 

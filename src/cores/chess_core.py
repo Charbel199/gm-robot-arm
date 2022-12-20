@@ -33,8 +33,14 @@ class ChessCore:
         self.current_board = self.get_board()
         logger.info(f'Stockfish engine with {os.environ.get("ELO_RATING")} ELO rating launched ...')
 
-        self.fake_moves_black = ["e7e5", "d8h4"]
-        self.fake_moves_white = ["e2e4", "d2d4", "d1d4"]
+        # self.fake_moves_black = ["e7e5", "e5d4"]
+        # self.fake_moves_white = ["e2e4", "d2d4", "d1d4"]
+
+        self.fake_moves_black = ["e7e5", "f8c5", "d8f6", "g7g5", "f6f2"]
+        self.fake_moves_white = ["e2e4", "g1f3", "f1c4", "d2d3", "f3g5"]
+
+        # self.fake_moves_black = ["e7e5", "d8f6", "f6f2"]
+        # self.fake_moves_white = ["e2e3", "e3e4", "d2d4"]
 
     def switch_turn(self):
         self.game_started = True
@@ -106,7 +112,13 @@ class ChessCore:
         return self.engine.visualizer.get_board_image()
 
     def deduce_move_from_squares(self, squares):
-        return self.engine.deduce_move(squares)
+        if not self.is_simulation:
+            next_best_move = self.engine.deduce_move(squares)
+        else:
+            next_best_move = self.fake_moves_white.pop(0) if self.engine_side == "BLACK" else self.fake_moves_black.pop(
+                0)
+
+        return next_best_move
 
     def get_move_commands(self, move):
         return self.engine.get_move_commands(move)

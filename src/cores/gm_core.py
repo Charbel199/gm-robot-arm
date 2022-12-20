@@ -29,7 +29,7 @@ class GMCore:
         self.use_robot = use_robot
         self.use_previous_calibrated_board = use_previous_calibrated_board
 
-        hsv_values = parse_hsv_json("assets/hsv/gm-colors2.json")
+        hsv_values = parse_hsv_json("assets/hsv/gm-colors-final.json")
         # Board squares
         self.hsv_white_squares_min = hsv_values['hsv_white_squares_min']
         self.hsv_white_squares_max = hsv_values['hsv_white_squares_max']
@@ -150,12 +150,14 @@ class GMCore:
         user_move = self.chess_core.deduce_move_from_squares(user_squares_changed)
         # Update move based on positions
         self.chess_core.update_board(user_move)
-
+        
         # Check if checkmate
         if self.chess_core.check_if_checkmate():
             logger.info(f"You checkmated GM arm!")
         else:
             self.chess_core.switch_turn()
+            time.sleep(2)
+            self.on_robot_move()
 
         # Wait x ms
         # self.on_robot_move()
@@ -170,23 +172,26 @@ class GMCore:
             return
         arm_move = self.chess_core.get_next_best_move()
         move_commands = self.chess_core.get_move_commands(arm_move)
-        self.chess_core.update_board(arm_move)
+
 
         if self.use_robot:
             # Send move to arm
             rospy.set_param('/control/move_complete_counter', len(move_commands))
+            
             for move_command in move_commands:
                 self.send_move(move_command)
             # self.chess_core.update_board(arm_move)
             # WAIT UNTIL MOVE IS COMPLETELY DONE
             while (rospy.get_param('/control/move_complete_counter') != 0):
                 pass
-        time.sleep(5)
+        self.chess_core.update_board(arm_move)
+        time.sleep(1)
         self.vision_core.update_images()
 
         # Check if checkmate
         if self.chess_core.check_if_checkmate():
             logger.info(f"GM arm just checkmated you!")
+            time.sleep(5)
             self.send_move(["DANCE", ""])
         else:
             self.chess_core.switch_turn()
@@ -227,6 +232,8 @@ class GMCore:
 
             labels = [str(i) for i in range(len(images_to_show))]
             images = concat_images(images_to_show, labels)
+            cv2.namedWindow("Images ", cv2.WND_PROP_FULLSCREEN)
+            cv2.setWindowProperty("Images ",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
             cv2.imshow('Images ', images)
             if cv2.waitKey(33) == ord('q'):
                 logger.info("Terminating ... \n\n\n")
