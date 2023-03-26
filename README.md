@@ -235,6 +235,10 @@ All the functionalities of the GM core were discussed in the [How to run it](#ho
 - [Georges Daou](https://github.com/George1044)
 - [Ralph Sakhat](https://github.com/Ralph-S)
 
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+
 ## Acknowledgements
 
 We would like to thank [3D Maker shop](https://www.3dmakershop.com/) for sponsoring our project and helping us print all the chess pieces that we used.
